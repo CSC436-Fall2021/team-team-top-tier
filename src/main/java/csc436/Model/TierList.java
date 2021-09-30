@@ -1,4 +1,4 @@
-package Model;
+package csc436.Model;
 
 /**
  * Program: TierList.java

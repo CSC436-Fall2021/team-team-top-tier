@@ -1,4 +1,4 @@
-package View;
+package csc436.View;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

@@ -1,4 +1,4 @@
-package Model;
+package csc436.Model;
 
 /**
  * Picture is an object that holds the path, name, and JavaFX image.

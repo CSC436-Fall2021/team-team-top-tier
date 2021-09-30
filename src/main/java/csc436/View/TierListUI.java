@@ -1,4 +1,4 @@
-package View;
+package csc436.View;
 
 /**
  * Program: TierListUI.java
