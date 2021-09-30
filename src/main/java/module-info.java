@@ -11,5 +11,4 @@ module csc436.tierlistmaker {
     requires eu.hansolo.tilesfx;
 
     opens csc436.tierlistmaker to javafx.fxml;
-    exports csc436.tierlistmaker;
 }
