@@ -16,6 +16,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class Picture {
+
+    public static final int IMAGE_CROP_SIZE = 75;
+
     private String path;
     private String name;
     private Image image;
@@ -56,6 +59,17 @@ public class Picture {
             System.out.printf("File %s not found.\n", path);
         }
     } // createImage end
+
+    public void createWriteableImage(Rectangle2D area) {
+        //need to use a writeable image that the snapshot can write on to
+        writableImage = new WritableImage(IMAGE_CROP_SIZE, IMAGE_CROP_SIZE); //this is right
+        params = new SnapshotParameters();
+        //params.setViewport(new Rectangle2D(0, 0, Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE));
+        params.setViewport(area);
+
+        writableImage = getImageView().snapshot(params, writableImage);
+
+    }
 
     /**
      * Getter Methods
