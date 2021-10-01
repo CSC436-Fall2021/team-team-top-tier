@@ -5,7 +5,12 @@ package csc436.Model;
  */
 
 
+import javafx.geometry.Rectangle2D;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +19,10 @@ public class Picture {
     private String path;
     private String name;
     private Image image;
+    private ImageView imageView;
+    private WritableImage writableImage;
+    private SnapshotParameters params;
+    private double width, height;
 
     /**
      * Picture(String path, String name) constructor
@@ -38,6 +47,11 @@ public class Picture {
     private void createImage() {
         try {
             this.image = new Image(new FileInputStream(path));
+            this.imageView = new ImageView(image);
+
+            width = image.getWidth();
+            height = image.getHeight();
+            System.out.printf("width: %f\nheight: %f\n", width, height);
         } catch (FileNotFoundException e) {
             System.out.printf("File %s not found.\n", path);
         }
@@ -49,4 +63,9 @@ public class Picture {
     public Image getImage() { return image; }
     public String getPath() { return path; }
     public String getName() { return name; }
+    public double getWidth() { return width; }
+    public double getHeight() { return height; }
+    public WritableImage getWritableImage() { return writableImage; }
+    public ImageView getImageView() { return this.imageView; }
+    public String toString() { return this.path; }
 }
