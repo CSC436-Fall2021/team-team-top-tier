@@ -23,4 +23,8 @@ public class TierListUI {
     public TierListUI(TierList tierList){
         tierGrid= new GridPane();
     }
+
+    public TierListUI getTierListUI(){
+        return this;
+    }
 }
