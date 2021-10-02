@@ -90,13 +90,14 @@ public class TierList implements Serializable {
      * @return the Tier instance that was saved on the tierListTitle_tier_index.dat file
      *
      */
-    public TierList load(String title) throws Exception{
+    public Object load(String title) throws Exception{
         try(ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(Paths.get(title + "_tierlist.dat")))){
-            if (ois.readObject() instanceof TierList){
+            /*if (ois.readObject() instanceof TierList){
                 return (TierList) ois.readObject();
             }else{
                 return null;
-            }
+            }*/
+            return ois.readObject();
         }
     }
 
