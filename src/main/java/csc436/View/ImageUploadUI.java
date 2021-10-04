@@ -10,22 +10,22 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.*;
-
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 
 public class ImageUploadUI extends Application {
 
+    public static final String TEST_FILE = "fileName.ser";
 
-
-    Stage stage;
-    ArrayList<Picture> list = new ArrayList<>();
+    private Stage stage;
+    private ArrayList<Picture> list = new ArrayList<>();
 
     // GraphicsContext of the main canvas
-    GraphicsContext gc;
+    private GraphicsContext gc;
 
     public static void main(String[] args) {
         launch(args);
@@ -40,17 +40,8 @@ public class ImageUploadUI extends Application {
         gc = canvas.getGraphicsContext2D();
         BorderPane pane = new BorderPane();
 
-        // TODO: create a canvas
-        // TODO: add a button that opens a file browser and adds the paths to some collection
-        // TODO: draw images on canvas
-        /*
-         * Eventually have something like
-         *
-         * for (Picture pic: pictures) {
-         *      gc.drawImage(pic.getImage(), x, y);
-         * }
-         *
-         */
+        list = loadPictures(TEST_FILE);
+        drawPictures(pane, canvas);
 
         Button importButt =  new Button("Import Images");
         EventHandler<ActionEvent> importEvent = new EventHandler<ActionEvent>() {
@@ -71,19 +62,8 @@ public class ImageUploadUI extends Application {
                         @Override
                         public void handle(WindowEvent windowEvent){
 
+                            drawPictures(pane,  canvas);
 
-                            //Draw all the Pictures currently in the list!
-                            int y = 0;
-                            int x = 0;
-                            for (Picture p : list) {
-                                gc.drawImage(p.getWritableImage(), x * Picture.IMAGE_CROP_SIZE, y * Picture.IMAGE_CROP_SIZE);
-                                x++;
-                                if (x == 5) {
-                                    y ++;
-                                    x = 0;
-                                }
-                            } // for end
-                            pane.setCenter(canvas);
                         }
                     };
 
@@ -91,16 +71,15 @@ public class ImageUploadUI extends Application {
 
                     Canvas cropCanvas = new Canvas (200, 200);
                     GraphicsContext imageGC = cropCanvas.getGraphicsContext2D();
+                    ImageView imgView = new ImageView(pic.createImage());
+                    imgView .setFitHeight(75);
+                    imgView .setPreserveRatio(true);
 
-                    pic.getImageView().setFitHeight(75);
-                    pic.getImageView().setPreserveRatio(true);
-
-                    imageGC.drawImage(pic.getImage(), 0, 0, 200, 200);
+                    imageGC.drawImage(pic.createImage(), 0, 0, 200, 200);
 
                     //TODO: can we make a movable, scaleable rectanlge, and a button to crop?
 
                     double max = Math.max(pic.getWidth(), pic.getHeight());
-                    Rectangle2D area = new Rectangle2D(0, 0, Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
 
                     BorderPane pain = new BorderPane();
                     pain.setCenter(cropCanvas);
@@ -110,9 +89,9 @@ public class ImageUploadUI extends Application {
                     imageCropUI.show();
 
                     //crop image to square (note: gc.drawImage will auto resize)
-                    pic.createWriteableImage(area);
+                    pic.createWriteableImage();
                     list.add(pic);
-
+                    savePictures(list, TEST_FILE);
 //                    imageGC.drawImage(pic.getWritableImage(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
                 }
             }
@@ -129,6 +108,21 @@ public class ImageUploadUI extends Application {
         stage.show();
     }
 
+    public void drawPictures(BorderPane pane, Canvas canvas) {
+        //Draw all the Pictures currently in the list!
+        int y = 0;
+        int x = 0;
+        for (Picture p : list) {
+            gc.drawImage(p.createWriteableImage(), x * Picture.IMAGE_CROP_SIZE, y * Picture.IMAGE_CROP_SIZE);
+            x++;
+            if (x == 5) {
+                y ++;
+                x = 0;
+            }
+        } // for end
+        pane.setCenter(canvas);
+    }
+
     public File doFilePickerUI() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Pick an image to upload");
@@ -139,5 +133,39 @@ public class ImageUploadUI extends Application {
         );
         //get the file chosen from the file picker
         return fileChooser.showOpenDialog(stage);
+    }
+
+    public void savePictures(ArrayList<Picture> pictures, String filename) {
+        FileOutputStream fileOut = null;
+        try {
+            fileOut = new FileOutputStream(filename);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(pictures);
+            out.close();
+            fileOut.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e2) {
+            e2.printStackTrace();
+        }
+    }
+
+    public ArrayList<Picture> loadPictures(String filename) {
+        try {
+            FileInputStream fileIn = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            ArrayList<Picture> out = (ArrayList<Picture>) in.readObject();
+            in.close();
+            fileIn.close();
+            return out;
+        } catch (FileNotFoundException e) {
+            System.out.println("No picture file found");
+            return new ArrayList<>();
+        } catch (IOException e2) {
+            e2.printStackTrace();
+        } catch (ClassNotFoundException e3) {
+            e3.printStackTrace();
+        }
+        return null;
     }
 }

@@ -11,20 +11,22 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.shape.Rectangle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 
-public class Picture {
+public class Picture implements Serializable{
 
     public static final int IMAGE_CROP_SIZE = 75;
 
     private String path;
     private String name;
-    private Image image;
-    private ImageView imageView;
-    private WritableImage writableImage;
-    private SnapshotParameters params;
+    //private Image image;
+    //private ImageView imageView;
+    //private WritableImage writableImage;
+    //private SnapshotParameters params;
     private double width, height;
 
     /**
@@ -47,39 +49,45 @@ public class Picture {
         createImage();
     } // Constructor end
 
-    private void createImage() {
+    public Image createImage() {
         try {
-            this.image = new Image(new FileInputStream(path));
-            this.imageView = new ImageView(image);
+            Image image = new Image(new FileInputStream(path));
+            //this.imageView = new ImageView(image);
 
             width = image.getWidth();
             height = image.getHeight();
             System.out.printf("width: %f\nheight: %f\n", width, height);
+            return image;
         } catch (FileNotFoundException e) {
             System.out.printf("File %s not found.\n", path);
         }
+        return null;
     } // createImage end
 
-    public void createWriteableImage(Rectangle2D area) {
+    public WritableImage createWriteableImage() {
         //need to use a writeable image that the snapshot can write on to
-        writableImage = new WritableImage(IMAGE_CROP_SIZE, IMAGE_CROP_SIZE); //this is right
-        params = new SnapshotParameters();
+        WritableImage writableImage = new WritableImage(IMAGE_CROP_SIZE, IMAGE_CROP_SIZE); //this is right
+        SnapshotParameters params = new SnapshotParameters();
         //params.setViewport(new Rectangle2D(0, 0, Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE));
-        params.setViewport(area);
+        params.setViewport(getSquareCrop());
+        ImageView imageView = new ImageView(createImage());
+        return imageView.snapshot(params, writableImage);
 
-        writableImage = getImageView().snapshot(params, writableImage);
+    }
 
+    public Rectangle2D getSquareCrop() {
+        return new Rectangle2D(0, 0, Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
     }
 
     /**
      * Getter Methods
      */
-    public Image getImage() { return image; }
+    //public Image getImage() { return image; }
     public String getPath() { return path; }
     public String getName() { return name; }
     public double getWidth() { return width; }
     public double getHeight() { return height; }
-    public WritableImage getWritableImage() { return writableImage; }
-    public ImageView getImageView() { return this.imageView; }
+    //public WritableImage getWritableImage() { return writableImage; }
+    //public ImageView getImageView() { return this.imageView; }
     public String toString() { return this.path; }
 }
