@@ -16,6 +16,7 @@ public class TierListMaker extends Application {
     private static Stage appStage;
     private AccountCollection accounts;
     private LoginUI loginUI;
+    private TierListUI tierListUI;
     public static final int appWidth = 660;
     public static final int appHeight = 550;
 
@@ -36,12 +37,20 @@ public class TierListMaker extends Application {
         System.out.println("Number of accounts: " + accounts.getAccCollection().size());
         //Creates a LogInUI object.
         loginUI = new LoginUI(accounts);
+        tierListUI= new TierListUI();
 
         appStage = stage;
         appStage.setTitle("TierList Maker");
 
         //Initially sets scene to display LogIn Window.
-        appStage.setScene(loginUI.getLogInWindow());
+       // appStage.setScene(loginUI.getLogInWindow());
+
+        // TESTING THE TIER LIST UI
+        appStage.setScene(tierListUI.getTierListUI());
+
+
+
+
         appStage.show();
 
         appStage.setOnCloseRequest((event) -> {
