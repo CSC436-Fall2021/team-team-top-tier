@@ -8,9 +8,13 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.*;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -58,22 +62,33 @@ public class ImageUploadUI extends Application {
                     EventHandler<WindowEvent> closeEvent = new EventHandler<WindowEvent>() {
                         @Override
                         public void handle(WindowEvent windowEvent){
-
                             drawPictures(pane,  canvas);
-
+                            savePictures(list, TEST_FILE);
                         }
                     };
 
                     imageCropUI.setOnCloseRequest(closeEvent);
 
-                    Canvas cropCanvas = new Canvas (200, 200);
-                    GraphicsContext imageGC = cropCanvas.getGraphicsContext2D();
+                    Image img = pic.createImage();
                     ImageView imgView = new ImageView(pic.createImage());
-                    imgView .setFitHeight(75);
-                    imgView .setPreserveRatio(true);
 
-                    imageGC.drawImage(pic.createImage(), 0, 0, 200, 200);
+                    Canvas cropCanvas = new Canvas (pic.getWidth(), pic.getHeight());
+                    GraphicsContext imageGC = cropCanvas.getGraphicsContext2D();
 
+                    EventHandler<MouseEvent> drawRect = new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent click) {
+                            imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
+                            imageGC.setStroke(Color.CADETBLUE);
+                            imageGC.setLineWidth(3);
+                            imageGC.strokeRect(click.getX(), click.getY(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
+                            pic.setSquareCrop(click.getX(), click.getY());
+                        }
+                    };
+
+                    cropCanvas.setOnMouseClicked(drawRect);
+
+                    imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
                     //TODO: can we make a movable, scaleable rectanlge, and a button to crop?
 
                     double max = Math.max(pic.getWidth(), pic.getHeight());
@@ -81,13 +96,12 @@ public class ImageUploadUI extends Application {
                     BorderPane pain = new BorderPane();
                     pain.setCenter(cropCanvas);
 
-                    Scene imageCropScene = new Scene(pain, 200, 200);
+                    Scene imageCropScene = new Scene(pain, pic.getWidth(), pic.getHeight());
                     imageCropUI.setScene(imageCropScene);
                     imageCropUI.show();
 
                     //crop image to square (note: gc.drawImage will auto resize)
                     list.add(pic);
-                    savePictures(list, TEST_FILE);
 //                  imageGC.drawImage(pic.getWritableImage(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
                 }
             }
