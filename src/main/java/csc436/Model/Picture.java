@@ -19,7 +19,7 @@ public class Picture implements Serializable{
     private String path;
     private String name;
     private double width, height; //actual image information
-    private double x1, x2, y1, y2;  //crop parameters (set by user)
+    private double x1, y1;  //crop parameters (set by user)
 
     /**
      * Picture(String path, String name) constructor

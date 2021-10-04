@@ -63,6 +63,7 @@ public class ImageUploadUI extends Application {
                         @Override
                         public void handle(WindowEvent windowEvent){
                             drawPictures(pane,  canvas);
+                            savePictures(list, TEST_FILE);
                         }
                     };
 
@@ -101,7 +102,6 @@ public class ImageUploadUI extends Application {
 
                     //crop image to square (note: gc.drawImage will auto resize)
                     list.add(pic);
-                    savePictures(list, TEST_FILE);
 //                  imageGC.drawImage(pic.getWritableImage(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
                 }
             }
