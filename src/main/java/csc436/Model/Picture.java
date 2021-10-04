@@ -2,30 +2,24 @@ package csc436.Model;
 
 /**
  * Picture is an object that holds the path, name, and JavaFX image.
+ * Picture is now serializable, yay!
  */
 
-
-import javafx.geometry.Rectangle2D;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 
-public class Picture {
+public class Picture implements Serializable{
 
     public static final int IMAGE_CROP_SIZE = 75;
 
     private String path;
     private String name;
-    private Image image;
-    private ImageView imageView;
-    private WritableImage writableImage;
-    private SnapshotParameters params;
-    private double width, height;
+    private double width, height; //actual image information
+    private double x1, x2, y1, y2;  //crop parameters (set by user)
 
     /**
      * Picture(String path, String name) constructor
@@ -37,6 +31,7 @@ public class Picture {
         this.name = name;
         createImage();
     } // Constructor end
+
     /**
      * Picture(String path, String name) alternative constructor (without name)
      * @param path - the file path of the picture
@@ -44,42 +39,53 @@ public class Picture {
     public Picture(String path) {
         this.path = path;
         this.name = path;
-        createImage();
+        createImage(); //sets width and height
     } // Constructor end
 
-    private void createImage() {
+    /**
+     * Returns the image that is loaded from the file path,
+     * this currently also sets the width and height parameters,
+     * and prints a debug message
+     * @return
+     */
+    public Image createImage() {
         try {
-            this.image = new Image(new FileInputStream(path));
-            this.imageView = new ImageView(image);
-
+            Image image = new Image(new FileInputStream(path));
             width = image.getWidth();
             height = image.getHeight();
             System.out.printf("width: %f\nheight: %f\n", width, height);
+            return image;
         } catch (FileNotFoundException e) {
             System.out.printf("File %s not found.\n", path);
         }
+        return null;
     } // createImage end
 
-    public void createWriteableImage(Rectangle2D area) {
-        //need to use a writeable image that the snapshot can write on to
-        writableImage = new WritableImage(IMAGE_CROP_SIZE, IMAGE_CROP_SIZE); //this is right
-        params = new SnapshotParameters();
-        //params.setViewport(new Rectangle2D(0, 0, Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE));
-        params.setViewport(area);
+    /**
+     * Returns the image crop as specified by the user parameters
+     * @return WriteableImage that has been cropped to the default
+     * size
+     */
+    public WritableImage getCroppedImage() {
+        Image original = createImage();
+        PixelReader reader = original.getPixelReader();
+        setSquareCrop(0, 0);
+        return new WritableImage(reader, (int) x1, (int)y1, IMAGE_CROP_SIZE, IMAGE_CROP_SIZE);
+    }
 
-        writableImage = getImageView().snapshot(params, writableImage);
-
+    public void setSquareCrop(double x1, double y1) {
+        //defaults for now, somewhere in the middle
+        //TODO: users set this
+        this.x1 = width / 2;  //this.x1 = x1;
+        this.y1 = height / 2;  //this.y1 = y1;
     }
 
     /**
      * Getter Methods
      */
-    public Image getImage() { return image; }
     public String getPath() { return path; }
     public String getName() { return name; }
     public double getWidth() { return width; }
     public double getHeight() { return height; }
-    public WritableImage getWritableImage() { return writableImage; }
-    public ImageView getImageView() { return this.imageView; }
     public String toString() { return this.path; }
 }
