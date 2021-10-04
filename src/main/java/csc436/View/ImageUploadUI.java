@@ -10,8 +10,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.*;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -71,8 +74,20 @@ public class ImageUploadUI extends Application {
                     Canvas cropCanvas = new Canvas (pic.getWidth(), pic.getHeight());
                     GraphicsContext imageGC = cropCanvas.getGraphicsContext2D();
 
-                    imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
+                    EventHandler<MouseEvent> drawRect = new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent click) {
+                            imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
+                            imageGC.setStroke(Color.CADETBLUE);
+                            imageGC.setLineWidth(3);
+                            imageGC.strokeRect(click.getX(), click.getY(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
+                            pic.setSquareCrop(click.getX(), click.getY());
+                        }
+                    };
 
+                    cropCanvas.setOnMouseClicked(drawRect);
+
+                    imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
                     //TODO: can we make a movable, scaleable rectanlge, and a button to crop?
 
                     double max = Math.max(pic.getWidth(), pic.getHeight());

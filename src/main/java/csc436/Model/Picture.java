@@ -69,15 +69,16 @@ public class Picture implements Serializable{
     public WritableImage getCroppedImage() {
         Image original = createImage();
         PixelReader reader = original.getPixelReader();
-        setSquareCrop(0, 0);
         return new WritableImage(reader, (int) x1, (int)y1, IMAGE_CROP_SIZE, IMAGE_CROP_SIZE);
     }
 
     public void setSquareCrop(double x1, double y1) {
         //defaults for now, somewhere in the middle
         //TODO: users set this
-        this.x1 = width / 2;  //this.x1 = x1;
-        this.y1 = height / 2;  //this.y1 = y1;
+        this.x1 = x1;
+        this.y1 = y1;
+        //this.x1 = width / 2;  //this.x1 = x1;
+        //this.y1 = height / 2;  //this.y1 = y1;
     }
 
     /**
