@@ -4,14 +4,11 @@ import csc436.Model.Picture;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.*;
 import java.io.*;
@@ -89,10 +86,9 @@ public class ImageUploadUI extends Application {
                     imageCropUI.show();
 
                     //crop image to square (note: gc.drawImage will auto resize)
-                    pic.createWriteableImage();
                     list.add(pic);
                     savePictures(list, TEST_FILE);
-//                    imageGC.drawImage(pic.getWritableImage(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
+//                  imageGC.drawImage(pic.getWritableImage(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
                 }
             }
         };
@@ -113,7 +109,7 @@ public class ImageUploadUI extends Application {
         int y = 0;
         int x = 0;
         for (Picture p : list) {
-            gc.drawImage(p.createWriteableImage(), x * Picture.IMAGE_CROP_SIZE, y * Picture.IMAGE_CROP_SIZE);
+            gc.drawImage(p.getCroppedImage(), x * Picture.IMAGE_CROP_SIZE, y * Picture.IMAGE_CROP_SIZE);
             x++;
             if (x == 5) {
                 y ++;
