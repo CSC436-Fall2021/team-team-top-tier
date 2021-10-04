@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.*;
@@ -58,21 +59,19 @@ public class ImageUploadUI extends Application {
                     EventHandler<WindowEvent> closeEvent = new EventHandler<WindowEvent>() {
                         @Override
                         public void handle(WindowEvent windowEvent){
-
                             drawPictures(pane,  canvas);
-
                         }
                     };
 
                     imageCropUI.setOnCloseRequest(closeEvent);
 
-                    Canvas cropCanvas = new Canvas (200, 200);
-                    GraphicsContext imageGC = cropCanvas.getGraphicsContext2D();
+                    Image img = pic.createImage();
                     ImageView imgView = new ImageView(pic.createImage());
-                    imgView .setFitHeight(75);
-                    imgView .setPreserveRatio(true);
 
-                    imageGC.drawImage(pic.createImage(), 0, 0, 200, 200);
+                    Canvas cropCanvas = new Canvas (pic.getWidth(), pic.getHeight());
+                    GraphicsContext imageGC = cropCanvas.getGraphicsContext2D();
+
+                    imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
 
                     //TODO: can we make a movable, scaleable rectanlge, and a button to crop?
 
@@ -81,7 +80,7 @@ public class ImageUploadUI extends Application {
                     BorderPane pain = new BorderPane();
                     pain.setCenter(cropCanvas);
 
-                    Scene imageCropScene = new Scene(pain, 200, 200);
+                    Scene imageCropScene = new Scene(pain, pic.getWidth(), pic.getHeight());
                     imageCropUI.setScene(imageCropScene);
                     imageCropUI.show();
 
