@@ -43,10 +43,10 @@ public class TierListMaker extends Application {
         appStage.setTitle("TierList Maker");
 
         //Initially sets scene to display LogIn Window.
-       // appStage.setScene(loginUI.getLogInWindow());
+       appStage.setScene(loginUI.getLogInWindow());
 
         // TESTING THE TIER LIST UI
-        appStage.setScene(tierListUI.getTierListUI());
+        //appStage.setScene(tierListUI.getTierListUI());
 
 
 
