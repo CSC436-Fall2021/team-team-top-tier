@@ -2,6 +2,7 @@ package csc436.View;
 
 import csc436.Model.Account;
 import csc436.Model.AccountCollection;
+import csc436.Model.Tier;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -29,7 +30,7 @@ import javafx.stage.Stage;
 public class LoginUI {
     private static final int loginAppWidth = 660;
     private static final int loginAppHeight = 550;
-    AccountCollection accounts;
+    private AccountCollection accounts;
 
     public LoginUI(AccountCollection accounts) {
         this.accounts = accounts;
@@ -45,7 +46,7 @@ public class LoginUI {
 
         //Creates the login Nodes necessary for the LogInUI.
         GridPane login = new GridPane();
-        Label jukeBox = new Label("Tier List Maker");
+        Label tierList = new Label("Tier List Maker");
         Label loginText = new Label("Enter your username and password");
         Label usrnameLabel = new Label("Username:");
         Label pwdLabel = new Label("Password:");
@@ -55,11 +56,11 @@ public class LoginUI {
         Button newAccountBtn = new Button("Create Account");
 
         //Setting the fond of the labels
-        jukeBox.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
+        tierList.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
         loginText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
 
         //Setting the color of the labels
-        jukeBox.setStyle("-fx-text-fill: white; -fx-font-family: impact");
+        tierList.setStyle("-fx-text-fill: white; -fx-font-family: impact");
         loginText.setStyle("-fx-text-fill: white; -fx-font-weight: bold");
         usrnameLabel.setStyle("-fx-text-fill: white; ");
         pwdLabel.setStyle("-fx-text-fill: white; ");
@@ -69,22 +70,22 @@ public class LoginUI {
         loginBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
 
         //Adding the components into a vbox.
-        HBox hBoxJukeBox= new HBox(jukeBox);
+        HBox hBoxTierList= new HBox(tierList);
         HBox hBoxLoginText = new HBox(loginText);
         HBox hBoxLogin = new HBox(login);
         GridPane gridButtons = new GridPane();
         gridButtons.setHgap(60);
         gridButtons.add(newAccountBtn, 0, 0);
         gridButtons.add(loginBtn, 1, 0);
-        VBox vBox = new VBox(hBoxJukeBox, hBoxLoginText, hBoxLogin, gridButtons);
+        VBox vBox = new VBox(hBoxTierList, hBoxLoginText, hBoxLogin, gridButtons);
 
         //Position of the Login components.
-        hBoxJukeBox.setAlignment(Pos.CENTER);
+        hBoxTierList.setAlignment(Pos.CENTER);
         hBoxLoginText.setAlignment(Pos.CENTER);
         hBoxLogin.setAlignment(Pos.CENTER);
         gridButtons.setAlignment(Pos.CENTER);
         vBox.setMargin(gridButtons, new Insets(10, 0, 10, 0));
-        vBox.setMargin(hBoxJukeBox, new Insets(0, 0, 25, 0));
+        vBox.setMargin(hBoxTierList, new Insets(0, 0, 25, 0));
         vBox.setMargin(hBoxLoginText, new Insets(0, 0, 10, 0));
 
         //Size of textFields.
@@ -217,6 +218,8 @@ public class LoginUI {
             loginText.setStyle("-fx-text-fill: white; -fx-font-weight: bold");
             //Sets current user to the signed in account.
             Account currentUser = accounts.getAccount(usrEntered, pwdEntered);
+            TierListUI tierListUI = new TierListUI();
+            TierListMaker.changeScenes(tierListUI.getTierListUI());
             //Updates the scene to our Profile window.
             System.out.println("Username: " + currentUser.getUsrname() + "\nPassword: " + currentUser.getPwd());
         }else {
