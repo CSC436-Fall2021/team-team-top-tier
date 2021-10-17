@@ -54,7 +54,20 @@ public class ImageUploadUI extends Application {
                 if (file != null) {
                     //deal with the file...
                     //TODO: add a name this picture popup
-                    Picture pic = new Picture(file.getPath());
+                    Picture pic_load = new Picture(file.getPath());;
+
+                    double sceneWidth = pic_load.getWidth();
+                    double sceneHeight = pic_load.getHeight();
+                    if (sceneWidth >= sceneHeight && sceneWidth > Screen.getPrimary().getBounds().getWidth() - 200) {
+                        sceneWidth = Screen.getPrimary().getBounds().getWidth() - 500;
+                        pic_load = new Picture(file.getPath(), sceneWidth, sceneWidth);
+                        sceneHeight = pic_load.getHeight();
+                    } else if (sceneHeight >= sceneWidth && sceneHeight > Screen.getPrimary().getBounds().getHeight() - 200) {
+                        sceneHeight = Screen.getPrimary().getBounds().getHeight() - 500;
+                        pic_load = new Picture(file.getPath(), sceneHeight, sceneHeight);
+                        sceneWidth = pic_load.getWidth();
+                    }
+                    Picture pic = pic_load;
 
                     //Show the uploaded image in a pop-up
                     final Stage imageCropUI = new Stage();
@@ -80,7 +93,7 @@ public class ImageUploadUI extends Application {
 
                     BorderPane imagePain = new BorderPane();
                     HBox buttons = new HBox();
-                    buttons.setAlignment(Pos.CENTER_LEFT);
+                    buttons.setAlignment(Pos.CENTER_RIGHT);
                     Button save_butt = new Button("Save");
                     save_butt.setOnAction(saveEvent);
                     Button cancel_butt = new Button("Cancel");
@@ -130,12 +143,10 @@ public class ImageUploadUI extends Application {
                     BorderPane pain = new BorderPane();
                     pain.setCenter(imagePain);
 
-                    Scene imageCropScene = new Scene(pain, pic.getWidth(), (pic.getHeight() + 50));
+                    Scene imageCropScene = new Scene(pain, sceneWidth, sceneHeight + 30);
                     imageCropUI.setScene(imageCropScene);
                     imageCropUI.show();
 
-                    //crop image to square (note: gc.drawImage will auto resize)
-                    //list.add(pic);
                 }
             }
         };

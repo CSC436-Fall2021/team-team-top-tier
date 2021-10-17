@@ -41,7 +41,27 @@ public class Picture implements Serializable{
     public Picture(String path) {
         this.path = path;
         this.name = path;
-        createImage(); //sets width and height
+        Image image = null;
+        try {
+            image = new Image(new FileInputStream(path));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        width = image.getWidth();
+        height = image.getHeight();
+    } // Constructor end
+
+    public Picture(String path, double width, double height) {
+        this.path = path;
+        this.name = path;
+        Image image = null;
+        try {
+            image = new Image(new FileInputStream(path), width, height, true, true);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        this.width = image.getWidth();
+        this.height = image.getHeight();
     } // Constructor end
 
     /**
@@ -52,9 +72,7 @@ public class Picture implements Serializable{
      */
     public Image createImage() {
         try {
-            Image image = new Image(new FileInputStream(path));
-            width = image.getWidth();
-            height = image.getHeight();
+            Image image = new Image(new FileInputStream(path), width, height, true, true);
             System.out.printf("width: %f\nheight: %f\n", width, height);
             return image;
         } catch (FileNotFoundException e) {
