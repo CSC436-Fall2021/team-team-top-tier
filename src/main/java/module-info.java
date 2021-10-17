@@ -10,6 +10,7 @@ module csc436.tierlistmaker {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires junit;
+    requires org.jetbrains.annotations;
 
     opens csc436.View to javafx.fxml;
     exports csc436.View;

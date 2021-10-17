@@ -4,15 +4,16 @@ import csc436.Model.Picture;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.*;
 
 import java.io.*;
@@ -25,9 +26,6 @@ public class ImageUploadUI extends Application {
     private Stage stage;
     private ArrayList<Picture> list = new ArrayList<>();
 
-    // GraphicsContext of the main canvas
-    private GraphicsContext gc;
-
     public static void main(String[] args) {
         launch(args);
     }
@@ -37,12 +35,14 @@ public class ImageUploadUI extends Application {
         stage = stageIn;
         stage.setTitle("Image upload");
 
-        Canvas canvas = new Canvas(375, 375);
-        gc = canvas.getGraphicsContext2D();
+        GridPane grid = new GridPane();
+        grid.setHgap(5);
+        grid.setVgap(5);
+        grid.setPadding(new Insets(25, 50, 25, 50));
         BorderPane pane = new BorderPane();
 
         list = loadPictures(TEST_FILE);
-        drawPictures(pane, canvas);
+        drawPictures(pane, grid);
 
         Button importButt =  new Button("Import Images");
         EventHandler<ActionEvent> importEvent = new EventHandler<ActionEvent>() {
@@ -62,39 +62,55 @@ public class ImageUploadUI extends Application {
                     EventHandler<WindowEvent> closeEvent = new EventHandler<WindowEvent>() {
                         @Override
                         public void handle(WindowEvent windowEvent){
-                            drawPictures(pane,  canvas);
+                            drawPictures(pane,  grid);
                             savePictures(list, TEST_FILE);
                         }
                     };
 
                     imageCropUI.setOnCloseRequest(closeEvent);
 
-                    Image img = pic.createImage();
-                    ImageView imgView = new ImageView(pic.createImage());
+                    BorderPane imagePain = new BorderPane();
+                    Group imageGroup = new Group(); //allows drawing on top of eachother
+                    imagePain.setCenter(imageGroup);
+                    imageGroup.getChildren().add(new ImageView(pic.createImage()));
+                    Rectangle crop = new Rectangle(0,0,0,0);
+                    crop.setStroke(Color.CADETBLUE);
+                    crop.setFill(null);
+                    imageGroup.getChildren().add(crop);
 
-                    Canvas cropCanvas = new Canvas (pic.getWidth(), pic.getHeight());
-                    GraphicsContext imageGC = cropCanvas.getGraphicsContext2D();
-
-                    EventHandler<MouseEvent> drawRect = new EventHandler<MouseEvent>() {
+                    EventHandler<MouseEvent> begin_drag = new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent click) {
-                            imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
-                            imageGC.setStroke(Color.CADETBLUE);
-                            imageGC.setLineWidth(3);
-                            imageGC.strokeRect(click.getX(), click.getY(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
+                            imageGroup.getChildren().remove(crop);
                             pic.setSquareCrop(click.getX(), click.getY());
+                            crop.setX(click.getX());
+                            crop.setY(click.getY());
+                            crop.setHeight(0);
+                            crop.setWidth(0);
+                            imageGroup.getChildren().add(crop);
                         }
                     };
 
-                    cropCanvas.setOnMouseClicked(drawRect);
+                    EventHandler<MouseEvent> do_drag = new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent drag) {
+                            double x_drag = drag.getX() - pic.getCropX();
+                            double y_drag = drag.getY() - pic.getCropY();
+                            if (x_drag > y_drag) {
+                                pic.setCropDemensions(x_drag);
+                            } else {
+                                pic.setCropDemensions(y_drag);
+                            }
+                            crop.setWidth(pic.getCropDemensions());
+                            crop.setHeight(pic.getCropDemensions());
+                        }
+                    };
 
-                    imageGC.drawImage(pic.createImage(), 0, 0, pic.getWidth(), pic.getHeight());
-                    //TODO: can we make a movable, scaleable rectanlge, and a button to crop?
-
-                    double max = Math.max(pic.getWidth(), pic.getHeight());
+                    imagePain.setOnMousePressed(begin_drag);
+                    imagePain.setOnMouseDragged(do_drag);
 
                     BorderPane pain = new BorderPane();
-                    pain.setCenter(cropCanvas);
+                    pain.setCenter(imagePain);
 
                     Scene imageCropScene = new Scene(pain, pic.getWidth(), pic.getHeight());
                     imageCropUI.setScene(imageCropScene);
@@ -102,7 +118,6 @@ public class ImageUploadUI extends Application {
 
                     //crop image to square (note: gc.drawImage will auto resize)
                     list.add(pic);
-//                  imageGC.drawImage(pic.getWritableImage(), Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE);
                 }
             }
         };
@@ -118,19 +133,19 @@ public class ImageUploadUI extends Application {
         stage.show();
     }
 
-    public void drawPictures(BorderPane pane, Canvas canvas) {
+    public void drawPictures(BorderPane pane, GridPane grid) {
         //Draw all the Pictures currently in the list!
         int y = 0;
         int x = 0;
         for (Picture p : list) {
-            gc.drawImage(p.getCroppedImage(), x * Picture.IMAGE_CROP_SIZE, y * Picture.IMAGE_CROP_SIZE);
+            grid.add(p.getCroppedImage(), x, y);
             x++;
             if (x == 5) {
                 y ++;
                 x = 0;
             }
         } // for end
-        pane.setCenter(canvas);
+        pane.setCenter(grid);
     }
 
     public File doFilePickerUI() {

@@ -6,6 +6,7 @@ package csc436.Model;
  */
 
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import java.io.FileInputStream;
@@ -20,6 +21,7 @@ public class Picture implements Serializable{
     private String name;
     private double width, height; //actual image information
     private double x1, y1;  //crop parameters (set by user)
+    private double cropDemensions;
 
     /**
      * Picture(String path, String name) constructor
@@ -66,19 +68,35 @@ public class Picture implements Serializable{
      * @return WriteableImage that has been cropped to the default
      * size
      */
-    public WritableImage getCroppedImage() {
+    public ImageView getCroppedImage() {
         Image original = createImage();
         PixelReader reader = original.getPixelReader();
-        return new WritableImage(reader, (int) x1, (int)y1, IMAGE_CROP_SIZE, IMAGE_CROP_SIZE);
+        WritableImage write = new WritableImage(reader, (int) x1, (int)y1, (int)cropDemensions, (int)cropDemensions);
+        ImageView view = new ImageView(write);
+        view.setPreserveRatio(true);
+        view.setFitHeight(IMAGE_CROP_SIZE);
+        return view;
     }
 
     public void setSquareCrop(double x1, double y1) {
-        //defaults for now, somewhere in the middle
-        //TODO: users set this
         this.x1 = x1;
         this.y1 = y1;
-        //this.x1 = width / 2;  //this.x1 = x1;
-        //this.y1 = height / 2;  //this.y1 = y1;
+    }
+
+    public void setCropDemensions(double dem) {
+        this.cropDemensions = dem;
+    }
+
+    public double getCropDemensions() {
+        return cropDemensions;
+    }
+
+    public double getCropX() {
+        return x1;
+    }
+
+    public double getCropY() {
+        return y1;
     }
 
     /**
