@@ -6,10 +6,12 @@ import csc436.Model.TierList;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class TierListMaker extends Application {
@@ -38,6 +40,13 @@ public class TierListMaker extends Application {
         loginUI = new LoginUI(accounts);
 
         appStage = stage;
+        Screen screen = Screen.getPrimary();
+        Rectangle2D bounds = screen.getVisualBounds();
+
+        appStage.setX(bounds.getMinX());
+        appStage.setY(bounds.getMinY());
+        appStage.setWidth(bounds.getWidth());
+        appStage.setHeight(bounds.getHeight());
         appStage.setTitle("TierList Maker");
 
         //Initially sets scene to display LogIn Window.
@@ -48,6 +57,7 @@ public class TierListMaker extends Application {
             try {
                 accounts.saveAccountCollection();
             }catch(Exception e) {
+                System.out.println("ERROR: UNABLE TO SAVE TIERLIST ACCOUNTS.");
             }
         });
     }

@@ -126,6 +126,8 @@ public class LoginUI {
 
         //Adds event to Create Account button. This allows the user to create a new account.
         newAccountBtn.setOnAction((event) -> {
+            usrnameField.setText("");
+            pwdField.setText("");
             final Stage newAccountStage = new Stage();
             BorderPane newAccountPane = new BorderPane();
             //newAccountPane.setStyle("-fx-background-color: crimson");
@@ -188,7 +190,7 @@ public class LoginUI {
             //Event handlers to create a new Account.
             createBtn.setOnAction((newEvent) -> {
                 //Attempts to create an account.
-                createAccount(newUsrnameField, newPwdField, confirmPwdField, newAccountText, newAccountStage);
+                createAccount(newUsrnameField, newPwdField, confirmPwdField, newAccountText, newAccountStage, loginText);
             });
 
 
@@ -218,8 +220,10 @@ public class LoginUI {
             loginText.setStyle("-fx-text-fill: white; -fx-font-weight: bold");
             //Sets current user to the signed in account.
             Account currentUser = accounts.getAccount(usrEntered, pwdEntered);
-            TierListUI tierListUI = new TierListUI();
-            TierListMaker.changeScenes(tierListUI.getTierListUI());
+            AccountUI user = new AccountUI(currentUser, accounts, this);
+            //TierListUI tierListUI = new TierListUI();
+            //TierListMaker.changeScenes(tierListUI.getTierListUI());
+            TierListMaker.changeScenes(user.getAccountWindow());
             //Updates the scene to our Profile window.
             System.out.println("Username: " + currentUser.getUsrname() + "\nPassword: " + currentUser.getPwd());
         }else {
@@ -239,7 +243,7 @@ public class LoginUI {
      * @param newAccountText The Text displayed in the pop-up UI.
      * @param newAccountStage The Stage of the pop-up UI.
      */
-    private void createAccount(TextField newUsrnameField, PasswordField newPwdField, PasswordField confirmPwdField, Label newAccountText, Stage newAccountStage){
+    private void createAccount(TextField newUsrnameField, PasswordField newPwdField, PasswordField confirmPwdField, Label newAccountText, Stage newAccountStage, Label loginText){
         String usrEntered = newUsrnameField.getText();
         String pwdEntered = newPwdField.getText();
         String pwdConfirmEntered = confirmPwdField.getText();
@@ -248,11 +252,12 @@ public class LoginUI {
         if (pwdEntered.equals(pwdConfirmEntered)){
             accounts.addAccToCollection(new Account(usrEntered, pwdEntered));
             newAccountStage.close();
+            loginText.setText("Account Created Successfully.");
+            loginText.setStyle("-fx-text-fill: white; -fx-font-weight: bold");
         }else{
             //Updates the feedback label to display error.
             newAccountText.setText("Passwords do not match.");
             newAccountText.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
-            newUsrnameField.setText("");
             newPwdField.setText("");
             confirmPwdField.setText("");
         }
