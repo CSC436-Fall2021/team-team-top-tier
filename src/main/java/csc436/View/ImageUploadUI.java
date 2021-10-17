@@ -28,6 +28,9 @@ public class ImageUploadUI extends Application {
     private Stage stage;
     private ArrayList<Picture> list = new ArrayList<>();
 
+    BorderPane pane;
+    GridPane grid;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -37,11 +40,11 @@ public class ImageUploadUI extends Application {
         stage = stageIn;
         stage.setTitle("Image upload");
 
-        GridPane grid = new GridPane();
+        grid = new GridPane();
         grid.setHgap(5);
         grid.setVgap(5);
         grid.setPadding(new Insets(25, 50, 25, 50));
-        BorderPane pane = new BorderPane();
+        pane = new BorderPane();
 
         list = loadPictures(TEST_FILE);
         drawPictures(pane, grid);
@@ -56,86 +59,7 @@ public class ImageUploadUI extends Application {
                     //TODO: add a name this picture popup
                     Picture pic = new Picture(file.getPath());
 
-                    //Show the uploaded image in a pop-up
-                    final Stage imageCropUI = new Stage();
-                    imageCropUI.initModality(Modality.WINDOW_MODAL); //this makes the rest of the application wait
-                    imageCropUI.initOwner(stage);
-
-                    EventHandler<ActionEvent> saveEvent = new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent actionEvent){
-                            list.add(pic);
-                            drawPictures(pane,  grid);
-                            savePictures(list, TEST_FILE);
-                            imageCropUI.close();
-                        }
-                    };
-
-                    EventHandler<ActionEvent> cancelEvent = new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent actionEvent){
-                            imageCropUI.close();
-                        }
-                    };
-
-                    BorderPane imagePain = new BorderPane();
-                    HBox buttons = new HBox();
-                    buttons.setAlignment(Pos.CENTER_LEFT);
-                    Button save_butt = new Button("Save");
-                    save_butt.setOnAction(saveEvent);
-                    Button cancel_butt = new Button("Cancel");
-                    cancel_butt.setOnAction(cancelEvent);
-                    buttons.getChildren().addAll(save_butt, cancel_butt);
-                    imagePain.setBottom(buttons);
-
-                    Group imageGroup = new Group(); //allows drawing on top of eachother
-                    imagePain.setCenter(imageGroup);
-                    imageGroup.getChildren().add(new ImageView(pic.createImage()));
-                    Rectangle crop = new Rectangle(0,0,0,0);
-                    crop.setStroke(Color.CADETBLUE);
-                    crop.setFill(null);
-                    imageGroup.getChildren().add(crop);
-
-                    EventHandler<MouseEvent> begin_drag = new EventHandler<MouseEvent>() {
-                        @Override
-                        public void handle(MouseEvent click) {
-                            imageGroup.getChildren().remove(crop);
-                            pic.setSquareCrop(click.getX(), click.getY());
-                            crop.setX(click.getX());
-                            crop.setY(click.getY());
-                            crop.setHeight(0);
-                            crop.setWidth(0);
-                            imageGroup.getChildren().add(crop);
-                        }
-                    };
-
-                    EventHandler<MouseEvent> do_drag = new EventHandler<MouseEvent>() {
-                        @Override
-                        public void handle(MouseEvent drag) {
-                            double x_drag = drag.getX() - pic.getCropX();
-                            double y_drag = drag.getY() - pic.getCropY();
-                            if (x_drag > y_drag) {
-                                pic.setCropDemensions(x_drag);
-                            } else {
-                                pic.setCropDemensions(y_drag);
-                            }
-                            crop.setWidth(pic.getCropDemensions());
-                            crop.setHeight(pic.getCropDemensions());
-                        }
-                    };
-
-                    imagePain.setOnMousePressed(begin_drag);
-                    imagePain.setOnMouseDragged(do_drag);
-
-                    BorderPane pain = new BorderPane();
-                    pain.setCenter(imagePain);
-
-                    Scene imageCropScene = new Scene(pain, pic.getWidth(), (pic.getHeight() + 50));
-                    imageCropUI.setScene(imageCropScene);
-                    imageCropUI.show();
-
-                    //crop image to square (note: gc.drawImage will auto resize)
-                    //list.add(pic);
+                    doCropUI(pic, false);
                 }
             }
         };
@@ -151,12 +75,109 @@ public class ImageUploadUI extends Application {
         stage.show();
     }
 
+    public void doCropUI(Picture pic, Boolean edit) {
+        //temporary picture copy for editing
+        Picture savedPicState = pic;
+        //Show the uploaded image in a pop-up
+        final Stage imageCropUI = new Stage();
+        imageCropUI.initModality(Modality.WINDOW_MODAL); //this makes the rest of the application wait
+        imageCropUI.initOwner(stage);
+
+        EventHandler<ActionEvent> saveEvent = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent){
+                if (!edit) {
+                    list.add(pic);
+                }
+                drawPictures(pane,  grid);
+                savePictures(list, TEST_FILE);
+                imageCropUI.close();
+            }
+        };
+
+        EventHandler<ActionEvent> cancelEvent = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent){
+                if (edit) {
+                    int idx = list.indexOf(pic);
+                    list.set(idx, savedPicState);
+                }
+                imageCropUI.close();
+            }
+        };
+
+        BorderPane imagePain = new BorderPane();
+        HBox buttons = new HBox();
+        buttons.setAlignment(Pos.CENTER_LEFT);
+        Button save_butt = new Button("Save");
+        save_butt.setOnAction(saveEvent);
+        Button cancel_butt = new Button("Cancel");
+        cancel_butt.setOnAction(cancelEvent);
+        buttons.getChildren().addAll(save_butt, cancel_butt);
+        imagePain.setBottom(buttons);
+
+        Group imageGroup = new Group(); //allows drawing on top of eachother
+        imagePain.setCenter(imageGroup);
+        imageGroup.getChildren().add(new ImageView(pic.createImage()));
+        Rectangle crop = new Rectangle(0,0,0,0);
+        crop.setStroke(Color.CADETBLUE);
+        crop.setFill(null);
+        imageGroup.getChildren().add(crop);
+
+        EventHandler<MouseEvent> begin_drag = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent click) {
+                imageGroup.getChildren().remove(crop);
+                pic.setSquareCrop(click.getX(), click.getY());
+                crop.setX(click.getX());
+                crop.setY(click.getY());
+                crop.setHeight(0);
+                crop.setWidth(0);
+                imageGroup.getChildren().add(crop);
+            }
+        };
+
+        EventHandler<MouseEvent> do_drag = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent drag) {
+                double x_drag = drag.getX() - pic.getCropX();
+                double y_drag = drag.getY() - pic.getCropY();
+                if (x_drag > y_drag) {
+                    pic.setCropDemensions(x_drag);
+                } else {
+                    pic.setCropDemensions(y_drag);
+                }
+                crop.setWidth(pic.getCropDemensions());
+                crop.setHeight(pic.getCropDemensions());
+            }
+        };
+
+        imagePain.setOnMousePressed(begin_drag);
+        imagePain.setOnMouseDragged(do_drag);
+
+        BorderPane pain = new BorderPane();
+        pain.setCenter(imagePain);
+
+        Scene imageCropScene = new Scene(pain, pic.getWidth(), (pic.getHeight() + 50));
+        imageCropUI.setScene(imageCropScene);
+        imageCropUI.show();
+    }
+
     public void drawPictures(BorderPane pane, GridPane grid) {
         //Draw all the Pictures currently in the list!
         int y = 0;
         int x = 0;
         for (Picture p : list) {
-            grid.add(p.getCroppedImage(), x, y);
+            EventHandler<ActionEvent> editPicture = new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    doCropUI(p, true);
+                }
+            };
+            Button picButt = new Button();
+            picButt.setGraphic(p.getCroppedImage());
+            picButt.setOnAction(editPicture);
+            grid.add(picButt, x, y);
             x++;
             if (x == 5) {
                 y ++;
