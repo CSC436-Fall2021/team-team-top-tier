@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -12,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.*;
@@ -59,17 +61,33 @@ public class ImageUploadUI extends Application {
                     imageCropUI.initModality(Modality.WINDOW_MODAL); //this makes the rest of the application wait
                     imageCropUI.initOwner(stage);
 
-                    EventHandler<WindowEvent> closeEvent = new EventHandler<WindowEvent>() {
+                    EventHandler<ActionEvent> saveEvent = new EventHandler<ActionEvent>() {
                         @Override
-                        public void handle(WindowEvent windowEvent){
+                        public void handle(ActionEvent actionEvent){
+                            list.add(pic);
                             drawPictures(pane,  grid);
                             savePictures(list, TEST_FILE);
+                            imageCropUI.close();
                         }
                     };
 
-                    imageCropUI.setOnCloseRequest(closeEvent);
+                    EventHandler<ActionEvent> cancelEvent = new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent actionEvent){
+                            imageCropUI.close();
+                        }
+                    };
 
                     BorderPane imagePain = new BorderPane();
+                    HBox buttons = new HBox();
+                    buttons.setAlignment(Pos.CENTER_LEFT);
+                    Button save_butt = new Button("Save");
+                    save_butt.setOnAction(saveEvent);
+                    Button cancel_butt = new Button("Cancel");
+                    cancel_butt.setOnAction(cancelEvent);
+                    buttons.getChildren().addAll(save_butt, cancel_butt);
+                    imagePain.setBottom(buttons);
+
                     Group imageGroup = new Group(); //allows drawing on top of eachother
                     imagePain.setCenter(imageGroup);
                     imageGroup.getChildren().add(new ImageView(pic.createImage()));
@@ -112,12 +130,12 @@ public class ImageUploadUI extends Application {
                     BorderPane pain = new BorderPane();
                     pain.setCenter(imagePain);
 
-                    Scene imageCropScene = new Scene(pain, pic.getWidth(), pic.getHeight());
+                    Scene imageCropScene = new Scene(pain, pic.getWidth(), (pic.getHeight() + 50));
                     imageCropUI.setScene(imageCropScene);
                     imageCropUI.show();
 
                     //crop image to square (note: gc.drawImage will auto resize)
-                    list.add(pic);
+                    //list.add(pic);
                 }
             }
         };
