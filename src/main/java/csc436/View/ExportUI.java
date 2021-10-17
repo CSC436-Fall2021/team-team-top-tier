@@ -10,7 +10,6 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +61,7 @@ public class ExportUI {
                     fileChooser.getExtensionFilters().add(extFilter);
 
                     RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
-                    ImageIO.write(renderedImage, "png", new File("C:/Users/David/Pictures/test.png"));
+                    ImageIO.write(renderedImage, "png", new File("./TierListImages/test.png"));
 
                     System.out.println("Image Saved");
                 } catch (IOException e) {
