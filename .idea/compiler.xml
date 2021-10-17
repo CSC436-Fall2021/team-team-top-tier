@@ -9,8 +9,5 @@
         <module name="TierListMaker" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="TierListMaker" target="16" />
-    </bytecodeTargetLevel>
   </component>
 </project>
