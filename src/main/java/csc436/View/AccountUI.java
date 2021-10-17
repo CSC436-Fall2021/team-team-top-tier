@@ -37,6 +37,8 @@ public class AccountUI {
     private LoginUI loginUI;
     private VBox tierLists;
     private int maxItemsPerRow;
+    private String nameOfTierList;
+    private TierList clickedTierList;
 
     public AccountUI(Account account, AccountCollection accounts, LoginUI login) {
         this.account = account;
@@ -167,17 +169,100 @@ public class AccountUI {
 
             //Temporary solution. Possibly add a SnapShot of the actual TierList.
             Button button = new Button();
-            button.setText(account.getTierLists().get(i).getTierListTitle());
+            clickedTierList = account.getTierLists().get(i);
+            nameOfTierList = clickedTierList.getTierListTitle();
+            button.setText(nameOfTierList);
             button.setStyle("-fx-font-size: 25pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
             button.setMaxSize(200, 200);
+
+            button.setOnAction((event) -> {
+                final Stage newTierListStage = new Stage();
+                BorderPane newTierListPane = new BorderPane();
+                newTierListStage.setTitle("Selected TierList");
+                newTierListStage.initModality(Modality.APPLICATION_MODAL);
+
+                //Creates the Nodes necessary for a new TierList (Text fields and button).
+                GridPane newTierList = new GridPane();
+                Label newTierListText = new Label(nameOfTierList + " TierList");
+                Label errorMsg = new Label();
+                Label newTierListTitle = new Label("Update Title:");
+                TextField newTierListTitleField = new TextField();
+                Button openBtn = new Button("Open");
+                Button deleteBtn = new Button("Delete");
+                Button updateBtn = new Button ("Update");
+
+                //Sets the style of the labels and button.
+                newTierListText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 24));
+                errorMsg.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
+                openBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+                deleteBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+                updateBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+
+                //Creates a VBox with all the Nodes.
+                HBox hBoxTierListText = new HBox(newTierListText);
+                HBox hBoxErrorMsg = new HBox(errorMsg);
+                HBox hBoxTierList = new HBox(newTierList);
+                GridPane gridPaneBtns = new GridPane();
+                gridPaneBtns.setHgap(25);
+                HBox hBoxBtns = new HBox(gridPaneBtns);
+                VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxBtns);
+
+                //Position of Nodes.
+                hBoxTierListText.setAlignment(Pos.CENTER);
+                hBoxErrorMsg.setAlignment(Pos.CENTER);
+                hBoxTierList.setAlignment(Pos.CENTER);
+                hBoxBtns.setAlignment(Pos.CENTER);
+                vBoxNewTierList.setMargin(hBoxErrorMsg, new Insets(5, 0, 0, 0));
+                vBoxNewTierList.setMargin(hBoxTierList, new Insets(10, 0, 10, 0));
+                vBoxNewTierList.setMargin(hBoxBtns, new Insets(10, 0, 10, 0));
+
+                //Size of textFields.
+                newTierListTitleField.setPrefWidth(100);
+                //Adding H and V gaps to components.
+                newTierList.setHgap(10);
+                newTierList.setVgap(10);
+
+                //Adds all the Labels and Fields for a new TierList to the grid.
+                newTierList.add(newTierListTitle, 0, 0);
+                newTierList.add(newTierListTitleField, 1, 0);
+
+                gridPaneBtns.add(deleteBtn, 0, 0);
+                gridPaneBtns.add(updateBtn, 1, 0);
+                gridPaneBtns.add(openBtn, 2, 0);
+
+                //Puts the VBox into a GridPane
+                newTierListPane.setCenter(vBoxNewTierList);
+                vBoxNewTierList.setAlignment(Pos.TOP_CENTER);
+                newTierListPane.setMargin(vBoxNewTierList, new Insets(25, 0, 0, 0));
+
+                //Event handlers to delete the selected TierList.
+                deleteBtn.setOnAction((newEvent) -> {
+                    //Creates and opens the new TierList.
+                    deleteTierList(clickedTierList, newTierListStage);
+                });
+
+                //Event handlers to update the selected TierList.
+                updateBtn.setOnAction((event1) -> {
+                    updateTierList(clickedTierList, newTierListTitleField, errorMsg, newTierListStage);
+                });
+
+                //Event handlers to open the selected TierList.
+                openBtn.setOnAction((event2) -> {
+                    openTierList(clickedTierList, newTierListStage);
+                });
+
+                Scene dialogScene = new Scene(newTierListPane, 300, 200);
+                newTierListStage.setScene(dialogScene);
+                newTierListStage.show();
+            });
 
             pane.getChildren().addAll(button);
             tempRow.add(pane, y, x);
             colIndex++;
         }
-        int numOfRows = tierLists.getChildren().size();
+        int numOfItems = account.getTierLists().size();
         //Checks to see if a new row needs to be created with the row constraints.
-        if (colIndex % maxItemsPerRow == 0) {
+        if (colIndex % maxItemsPerRow == 0 && numOfItems != 0) {
             tierLists.getChildren().add(tempRow);
             tierLists.setMargin(tempRow, new Insets(0, 0, 25, 0));
             tempRow = new GridPane();
@@ -227,25 +312,30 @@ public class AccountUI {
                 //Creates the Nodes necessary for a new TierList (Text fields and button).
                 GridPane newTierList = new GridPane();
                 Label newTierListText = new Label("Create New TierList");
+                Label errorMsg = new Label();
                 Label newTierListTitle = new Label("TierList Title:");
                 TextField newTierListTitleField = new TextField();
                 Button createBtn = new Button("Create");
 
                 //Sets the style of the labels and button.
-                newTierListText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
+                newTierListText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 24));
+                errorMsg.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
                 createBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
 
                 //Creates a VBox with all the Nodes.
                 HBox hBoxTierListText = new HBox(newTierListText);
+                HBox hBoxErrorMsg = new HBox(errorMsg);
                 HBox hBoxTierList = new HBox(newTierList);
                 HBox hBoxCreateBtn = new HBox(createBtn);
-                VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxTierList, hBoxCreateBtn);
+                VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxCreateBtn);
 
                 //Position of Nodes.
                 hBoxTierListText.setAlignment(Pos.CENTER);
+                hBoxErrorMsg.setAlignment(Pos.CENTER);
                 hBoxTierList.setAlignment(Pos.CENTER);
                 hBoxCreateBtn.setAlignment(Pos.CENTER);
                 vBoxNewTierList.setMargin(hBoxTierList, new Insets(10, 0, 10, 0));
+                vBoxNewTierList.setMargin(hBoxErrorMsg, new Insets(5, 0, 0, 0));
                 vBoxNewTierList.setMargin(hBoxCreateBtn, new Insets(10, 0, 10, 155));
 
                 //Size of textFields.
@@ -267,12 +357,12 @@ public class AccountUI {
                 //Event handlers to create a new TierList.
                 createBtn.setOnAction((newEvent) -> {
                     //Creates and opens the new TierList.
-                    createTierList(newTierListTitleField, newTierListStage);
+                    createTierList(newTierListTitleField, errorMsg, newTierListStage);
                 });
 
                 newTierListTitleField.setOnKeyPressed((e) -> {
                     if (e.getCode() == KeyCode.ENTER){
-                        createTierList(newTierListTitleField, newTierListStage);
+                        createTierList(newTierListTitleField, errorMsg, newTierListStage);
                     }
                 });
 
@@ -294,19 +384,87 @@ public class AccountUI {
     /**
      * Purpose: Creates a new TierList given the info inputted.
      * @param tierListTitle The Title of the TierList.
+     * @param errorMsg A Label that may display an error message to the user.
      * @param tierListStage The Stage which contained the Create button.
      */
-    private void createTierList(TextField tierListTitle, Stage tierListStage) {
+    private void createTierList(TextField tierListTitle, Label errorMsg, Stage tierListStage) {
         String title = tierListTitle.getText();
+        boolean exists = false;
 
-        //Creates a new TierList and adds it to the TierList List of the user's account.
-        TierList newTierList = new TierList(title);
-        account.getTierLists().add(newTierList);
+        //Iterates through TierList and checks if the title already exists.
+        for (TierList t : account.getTierLists()) {
+            if (t.getTierListTitle().equals(title)){
+                exists = true;
+                break;
+            }
+        }
 
-        //Creates a new TierListUI and displayed the TierList.
-        TierListUI tierListUI = new TierListUI();
-        tierListStage.close();
-        TierListMaker.changeScenes(tierListUI.getTierListUI());
+        if (!exists){
+            //Creates a new TierList and adds it to the TierList List of the user's account.
+            TierList newTierList = new TierList(title);
+            account.getTierLists().add(newTierList);
+            //Creates a new TierListUI and displayed the TierList.
+            TierListUI tierListUI = new TierListUI(newTierList);
+            TierListMaker.changeScenes(tierListUI.getTierListUI());
+            tierListStage.close();
+        }else{//If Title exists, display error message.
+            errorMsg.setText("The Title Already Exists.");
+            errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
+            tierListTitle.setText("");
+        }
     }
 
+    /**
+     * Purpose: Deletes the specified TierList from the user's account.
+     * @param tierList The TierList to be deleted.
+     * @param newTierListStage The Stage which contained the Delete button.
+     */
+    private void deleteTierList(TierList tierList, Stage newTierListStage){
+        account.getTierLists().remove(tierList);
+        newTierListStage.close();
+        showTierLists();
+    }
+
+    /**
+     * Purpose: Updates the title of a TierList with the specified String.
+     * @param tierList The TierList clicked on the user's Account.
+     * @param newTierListTitleField The new title of the TierList.
+     * @param errorMsg A Label that may display an error message to the user.
+     * @param newTierListStage The Stage which contained the Update button.
+     */
+    private void updateTierList(TierList tierList, TextField newTierListTitleField, Label errorMsg, Stage newTierListStage) {
+        boolean exists = false;
+        String newTitle = newTierListTitleField.getText();
+
+        //Iterates through TierList and checks if the title already exists.
+        for (TierList t : account.getTierLists()) {
+            if (t.getTierListTitle().equals(newTitle)){
+                exists = true;
+                break;
+            }
+        }
+
+        //If the title does not already exist, update the title of the TierList.
+        if (!exists){
+            tierList.setTierListTitle(newTitle);
+            newTierListStage.close();
+            showTierLists();
+        }else{//If Title exists, display error message.
+            errorMsg.setText("The Title Already Exists.");
+            errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
+            newTierListTitleField.setText("");
+        }
+    }
+
+    /**
+     * Purpose: Opens the TierListUI of the specified TierList.
+     * @param tierList The TierList clicked on the user's Account.
+     * @param newTierListStage The Stage which contained the Open button.
+     */
+    private void openTierList(TierList tierList, Stage newTierListStage) {
+        //Creates a new TierListUI and displayed the TierList.
+        TierListUI tierListUI = new TierListUI(tierList);
+        newTierListStage.close();
+        TierListMaker.changeScenes(tierListUI.getTierListUI());
+    }
 }
