@@ -20,6 +20,8 @@ public class TierListMaker extends Application {
     private LoginUI loginUI;
     public static final int appWidth = 660;
     public static final int appHeight = 550;
+    private static Screen screen;
+    private static Rectangle2D bounds;
 
     public static void main(String[] args) {
         launch(args);
@@ -40,14 +42,15 @@ public class TierListMaker extends Application {
         loginUI = new LoginUI(accounts);
 
         appStage = stage;
-        Screen screen = Screen.getPrimary();
-        Rectangle2D bounds = screen.getVisualBounds();
+        screen = Screen.getPrimary();
+        bounds = screen.getVisualBounds();
 
         appStage.setX(bounds.getMinX());
         appStage.setY(bounds.getMinY());
         appStage.setWidth(bounds.getWidth());
         appStage.setHeight(bounds.getHeight());
         appStage.setTitle("TierList Maker");
+        //appStage.setMaximized(false);
 
         //Initially sets scene to display LogIn Window.
         appStage.setScene(loginUI.getLogInWindow());
@@ -66,8 +69,10 @@ public class TierListMaker extends Application {
      * Purpose: Changes the current scene.
      * @param scene The new Scene to be displayed.
      */
-    public static void changeScenes(Scene scene){
+    public static void changeScenes(Scene scene) {
+        appStage.setMaximized(false);
         appStage.setScene(scene);
+        appStage.setMaximized(true);
     }
 
 }
