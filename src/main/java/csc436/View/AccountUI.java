@@ -171,11 +171,14 @@ public class AccountUI {
             Button button = new Button();
             clickedTierList = account.getTierLists().get(i);
             nameOfTierList = clickedTierList.getTierListTitle();
+            int index = i;
             button.setText(nameOfTierList);
             button.setStyle("-fx-font-size: 25pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
             button.setMaxSize(200, 200);
 
             button.setOnAction((event) -> {
+                clickedTierList = account.getTierLists().get(index);
+                nameOfTierList = clickedTierList.getTierListTitle();
                 final Stage newTierListStage = new Stage();
                 BorderPane newTierListPane = new BorderPane();
                 newTierListStage.setTitle("Selected TierList");
@@ -436,21 +439,28 @@ public class AccountUI {
         boolean exists = false;
         String newTitle = newTierListTitleField.getText();
 
-        //Iterates through TierList and checks if the title already exists.
-        for (TierList t : account.getTierLists()) {
-            if (t.getTierListTitle().equals(newTitle)){
-                exists = true;
-                break;
+        if (!newTitle.isEmpty()) {
+            //Iterates through TierList and checks if the title already exists.
+            for (TierList t : account.getTierLists()) {
+                if (t.getTierListTitle().equals(newTitle)){
+                    exists = true;
+                    break;
+                }
+            }
+
+            //If the title does not already exist, update the title of the TierList.
+            if (!exists){
+                tierList.setTierListTitle(newTitle);
+                newTierListStage.close();
+                showTierLists();
+            }else{//If Title exists, display error message.
+                errorMsg.setText("The Title Already Exists.");
+                errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
+                newTierListTitleField.setText("");
             }
         }
-
-        //If the title does not already exist, update the title of the TierList.
-        if (!exists){
-            tierList.setTierListTitle(newTitle);
-            newTierListStage.close();
-            showTierLists();
-        }else{//If Title exists, display error message.
-            errorMsg.setText("The Title Already Exists.");
+        else{//If Title exists, display error message.
+            errorMsg.setText("The Title Can't Be Empty.");
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierListTitleField.setText("");
         }
