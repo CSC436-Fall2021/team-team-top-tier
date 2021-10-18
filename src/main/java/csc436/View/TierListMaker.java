@@ -70,9 +70,7 @@ public class TierListMaker extends Application {
      * @param scene The new Scene to be displayed.
      */
     public static void changeScenes(Scene scene) {
-        appStage.setMaximized(false);
         appStage.setScene(scene);
-        appStage.setMaximized(true);
     }
 
 }
