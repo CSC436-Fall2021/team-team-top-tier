@@ -59,10 +59,8 @@ public class TierListUI {
 
         // The loop adds nodes to the tier list GridPane and stylizes them as well
         for (int i=0;i<tiers.size();i++) {
-            indexOfSelectedTier = i;
-            selectedTier = tiers.get(indexOfSelectedTier);
-            selectedTierTitle = selectedTier.getTierTitle();
-            nameBoxes.add(new HBox(new Label(selectedTierTitle)));
+            int index = i;
+            nameBoxes.add(new HBox(new Label(tiers.get(i).getTierTitle())));
             tierGrid.add(nameBoxes.get(i),0,i);
 
             tierBoxes.add(new HBox());
@@ -74,6 +72,8 @@ public class TierListUI {
             //button.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
 
             options.setOnAction((event) -> {
+                selectedTier = tiers.get(index);
+                selectedTierTitle = selectedTier.getTierTitle();
                 final Stage newTierListStage = new Stage();
                 BorderPane newTierListPane = new BorderPane();
                 newTierListStage.setTitle("Selected Tier");
@@ -259,21 +259,27 @@ public class TierListUI {
         boolean exists = false;
         String newTitle = newTierTitleField.getText();
 
-        //Iterates through Tier and checks if the title already exists.
-        for (Tier t : tierList.getTiers()) {
-            if (t.getTierTitle().equals(newTitle)){
-                exists = true;
-                break;
+        if (!newTitle.isEmpty()){
+            //Iterates through Tier and checks if the title already exists.
+            for (Tier t : tierList.getTiers()) {
+                if (t.getTierTitle().equals(newTitle)){
+                    exists = true;
+                    break;
+                }
             }
-        }
 
-        //If the title does not already exist, update the title of the Tier.
-        if (!exists){
-            tier.setTierTitle(newTitle);
-            newTierStage.close();
-            //showTierLists();
-        }else{//If Title exists, display error message.
-            errorMsg.setText("The Title Already Exists.");
+            //If the title does not already exist, update the title of the Tier.
+            if (!exists){
+                tier.setTierTitle(newTitle);
+                newTierStage.close();
+                //showTierLists();
+            }else{//If Title exists, display error message.
+                errorMsg.setText("The Title Already Exists.");
+                errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
+                newTierTitleField.setText("");
+            }
+        }else{
+            errorMsg.setText("The Title Can't Be Empty.");
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
         }
