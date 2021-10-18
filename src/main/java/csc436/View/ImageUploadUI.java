@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.*;
+import org.kordamp.bootstrapfx.scene.layout.Panel;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -40,16 +41,18 @@ public class ImageUploadUI extends Application {
         stage = stageIn;
         stage.setTitle("Image upload");
 
-        grid = new GridPane();
-        grid.setHgap(5);
-        grid.setVgap(5);
-        grid.setPadding(new Insets(25, 50, 25, 50));
         pane = new BorderPane();
+        pane.setStyle("-fx-background-color: crimson");
+        grid = new GridPane();
+        grid.setHgap(3);
+        grid.setVgap(3);
+        grid.setPadding(new Insets(15, 15, 15, 15));
 
         list = loadPictures(TEST_FILE);
         drawPictures(pane, grid);
 
         Button importButt =  new Button("Import Images");
+        importButt.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
         EventHandler<ActionEvent> importEvent = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -78,8 +81,10 @@ public class ImageUploadUI extends Application {
         };
 
         importButt.setOnAction(importEvent);
-
-        pane.setTop(importButt);
+        BorderPane secondPane = new BorderPane();
+        secondPane.setPadding(new Insets(10, 5, 5, 5));
+        secondPane.setCenter(importButt);
+        pane.setTop(secondPane);
 
         //Show stage and set scene
         Scene scene = new Scene(pane, 500, 500);
