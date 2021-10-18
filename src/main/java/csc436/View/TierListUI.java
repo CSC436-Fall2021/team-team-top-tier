@@ -8,6 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -15,6 +20,9 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +33,7 @@ import java.util.List;
  *          This is the core user interface for the Tier Maker application.
  *
  * Created: 09/29/2021
- * @author AMir Ameri
+ * @author AMir Ameri, Victor Jimenez, David Dung
  */
 public class TierListUI {
     private TierList tierList;
@@ -52,7 +60,7 @@ public class TierListUI {
         Label title= new Label(tierList.getTierListTitle());
         HBox titleBox= new HBox(title);
 
-        // Following arrays are usd to track the nodes which comprise the tier list itself
+        // Following lists  are usd to track the nodes which comprise the tier list itself
         LinkedList<HBox> nameBoxes= new LinkedList<HBox>();
         LinkedList<HBox> tierBoxes= new LinkedList<HBox>();
         LinkedList<VBox> buttonBoxes= new LinkedList<VBox>();
@@ -63,9 +71,27 @@ public class TierListUI {
             nameBoxes.add(new HBox(new Label(tiers.get(i).getTierTitle())));
             tierGrid.add(nameBoxes.get(i),0,i);
 
-            tierBoxes.add(new HBox());
+            ImageView imgView= new ImageView(new Image("D:\\Programs\\CSC 436\\Projects\\InProgress\\team-team-top-tier\\Tier LIst Maker\\src\\main\\java\\csc436\\Images\\addImage.png", 120,120, false,true));
+            tierBoxes.add(new HBox(imgView));
             tierGrid.add(tierBoxes.get(i),1,i);
 
+            imgView.setOnDragOver((newEvent) -> {
+                if (newEvent.getDragboard().hasFiles()){
+                    newEvent.acceptTransferModes(TransferMode.ANY);
+                }
+            });
+
+            imgView.setOnDragDropped((newEvent)  -> {
+                List<File> fileList= newEvent.getDragboard().getFiles();
+                try {
+                    imgView.setImage(new Image(new FileInputStream(fileList.get(0)), 120,120,false,true));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
+
+
+            // Options Button code section
             Button options = new Button("Options");
             //HBox button = new HBox(options);
             //button.setAlignment(Pos.CENTER);
@@ -191,7 +217,6 @@ public class TierListUI {
 
             // Modifies the tiers themselves
             tierBoxes.get(i).setAlignment(Pos.CENTER_LEFT);
-            tierBoxes.get(i).setPadding(new Insets(35,0,35,0));
             tierBoxes.get(i).setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
 
             // Modifies the option boxes on the right
@@ -201,17 +226,43 @@ public class TierListUI {
 
         for (int i=0; i<3;i++){
             for (int j=0; j<10;j++){
-                imageGrid.add(new HBox(new Label("Image")),j,i);
+                Image heldImage= new Image("D:\\Programs\\CSC 436\\Projects\\InProgress\\team-team-top-tier\\Tier LIst Maker\\src\\main\\java\\csc436\\Images\\Chimp.jpg",120.0,120.0,false,true);
+                ImageView view=new ImageView(heldImage);
+                imageGrid.add(view,j,i);
+
+                view.setOnDragDetected((event) -> {
+                    Dragboard dBoard= view.startDragAndDrop(TransferMode.ANY);
+                    ClipboardContent clipCont= new ClipboardContent();
+                    clipCont.putImage(view.getImage());
+                    dBoard.setContent(clipCont);
+
+                    event.consume();
+                });
             }
         }
+        /*
+        for (Node node : imageGrid.getChildren()){
+            node.setOnDragDetected((event1) -> {
+                ImageView view= (ImageView) node;
+                Dragboard dBoard= view.startDragAndDrop(TransferMode.ANY);
+                ClipboardContent clipCont= new ClipboardContent();
+                clipCont.putImage(view.getImage());
+                dBoard.setContent(clipCont);
+
+                event1.consume();
+            });
+        }
+        */
+
+
 
         // TOD DO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(680));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
 
-        imageGrid.setHgap(75);
-        imageGrid.setVgap(75);
+        //imageGrid.setHgap(75);
+        //imageGrid.setVgap(75);
 
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
@@ -246,6 +297,7 @@ public class TierListUI {
     private void deleteTier(Tier tier, Stage newTierStage){
         tierList.getTiers().remove(tier);
         newTierStage.close();
+        TierListMaker.changeScenes(getTierListUI());
     }
 
     /**
@@ -283,6 +335,7 @@ public class TierListUI {
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
         }
+        TierListMaker.changeScenes(getTierListUI());
     }
 
     /**
@@ -316,6 +369,7 @@ public class TierListUI {
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
         }
+        TierListMaker.changeScenes(getTierListUI());
     }
 
     /**
@@ -349,5 +403,6 @@ public class TierListUI {
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
         }
+        TierListMaker.changeScenes(getTierListUI());
     }
 }
