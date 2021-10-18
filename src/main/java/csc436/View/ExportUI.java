@@ -14,6 +14,7 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import javafx.embed.swing.*;
+import javafx.stage.Stage;
 
 /**
  * Program: ExportUI.java
@@ -45,32 +46,31 @@ public class ExportUI {
 
     private void makeButton() {
         Button exportButt = new Button();
-        EventHandler<ActionEvent> exportEvent = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                // TODO: crop the scene
-                WritableImage writableImage = tierPane.snapshot(new SnapshotParameters(), null);
-                // TODO: save the scene
+        EventHandler<ActionEvent> exportEvent = actionEvent -> {
+            // TODO: crop the scene
+            // TODO: save the scene
+            // TODO: open a file browser for user to choose location
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save");
+
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            File file = fileChooser.showSaveDialog(new Stage());
+
+            if (file != null) {
                 try {
-                    // TODO: open a file browser for user to choose location
-                    FileChooser fileChooser = new FileChooser();
-
-                    //Set extension filter
-                    FileChooser.ExtensionFilter extFilter =
-                            new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
-                    fileChooser.getExtensionFilters().add(extFilter);
-
+                    WritableImage writableImage = tierPane.snapshot(new SnapshotParameters(), null);
                     RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
-                    ImageIO.write(renderedImage, "png", new File("test.png"));
-
+                    ImageIO.write(renderedImage, "png", file);
                     System.out.println("Image Saved");
                 } catch (IOException e) {
-                    System.out.println("Cannot write image");
                 }
             }
         };
         exportButt.setOnAction(exportEvent);
-        exportButt.setText("Save TierList");
+        exportButt.setText("Save");
         pane.setCenter(exportButt);
     }
 
