@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -61,7 +62,15 @@ public class TierListUI {
         pane= new BorderPane();
         tierGrid= new GridPane();
         imageGrid = new GridPane();
-        VBox gridBox= new VBox(tierGrid,imageGrid);
+
+        //ScrollPane added for Tier Lists
+        ScrollPane tierGridScroll = new ScrollPane(tierGrid);
+        tierGridScroll.setFitToHeight(true);
+        tierGridScroll.setFitToWidth(true);
+        tierGridScroll.setStyle("-fx-background: black; -fx-border-color: black;");
+        HBox scrollPane = new HBox(tierGridScroll);
+
+        VBox gridBox= new VBox(scrollPane,imageGrid);
 
         Label title= new Label(tierList.getTierListTitle());
         HBox titleBox= new HBox(title);
@@ -80,10 +89,10 @@ public class TierListUI {
 
         // Position title and grids
         pane.setMargin(titleBox, new Insets(10,0,40,0));
-        gridBox.setMargin(tierGrid, new Insets(0,0,40,0));
+        gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
 
         titleBox.setAlignment(Pos.TOP_CENTER);
-        tierGrid.setAlignment(Pos.TOP_CENTER);
+        scrollPane.setAlignment(Pos.TOP_CENTER);
         imageGrid.setAlignment(Pos.BOTTOM_CENTER);
 
         pane.setStyle("-fx-background-color: black");
