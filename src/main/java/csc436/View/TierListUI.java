@@ -8,6 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -25,7 +30,7 @@ import java.util.List;
  *          This is the core user interface for the Tier Maker application.
  *
  * Created: 09/29/2021
- * @author AMir Ameri
+ * @author AMir Ameri, Victor Jimenez, David Dung
  */
 public class TierListUI {
     private TierList tierList;
@@ -33,7 +38,15 @@ public class TierListUI {
     private int  windowHeight;
     private String selectedTierTitle;
     private Tier selectedTier;
+    private BorderPane pane;
     private int indexOfSelectedTier;
+    private Scene tierListScene;
+
+    private LinkedList<HBox> nameBoxes;
+    private LinkedList<HBox> tierBoxes;
+    private LinkedList<VBox> buttonBoxes;
+    private GridPane tierGrid;
+    private GridPane imageGrid;
 
     public TierListUI(TierList tierList){
         this.tierList= tierList;
@@ -41,31 +54,78 @@ public class TierListUI {
         windowHeight= 720;
     }
 
-    // Create and return the Tier List's user interface
-    public Scene  getTierListUI(){
-        List<Tier> tiers= tierList.getTiers();
-        BorderPane pane= new BorderPane();
-        GridPane tierGrid= new GridPane();
-        GridPane imageGrid= new GridPane();
+    public Scene  getTierListUI() {
+        pane= new BorderPane();
+        tierGrid= new GridPane();
+        imageGrid = new GridPane();
         VBox gridBox= new VBox(tierGrid,imageGrid);
 
         Label title= new Label(tierList.getTierListTitle());
         HBox titleBox= new HBox(title);
 
-        // Following arrays are usd to track the nodes which comprise the tier list itself
-        LinkedList<HBox> nameBoxes= new LinkedList<HBox>();
-        LinkedList<HBox> tierBoxes= new LinkedList<HBox>();
-        LinkedList<VBox> buttonBoxes= new LinkedList<VBox>();
+        // Following lists  are usd to track the nodes which comprise the tier list itself
+        nameBoxes = new LinkedList<HBox>();
+        tierBoxes = new LinkedList<HBox>();
+        buttonBoxes = new LinkedList<VBox>();
 
+        pane.setTop(titleBox);
+        pane.setCenter(gridBox);
+
+        // set the Export button pane
+        ExportUI exportButt = new ExportUI(tierGrid);
+        pane.setBottom(exportButt.getExportUI());
+
+        // Position title and grids
+        pane.setMargin(titleBox, new Insets(10,0,40,0));
+        gridBox.setMargin(tierGrid, new Insets(0,0,40,0));
+
+        titleBox.setAlignment(Pos.TOP_CENTER);
+        tierGrid.setAlignment(Pos.TOP_CENTER);
+        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
+
+        pane.setStyle("-fx-background-color: black");
+
+        title.setStyle("-fx-text-fill: white; -fx-font-family: impact");
+        title.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
+
+        Scene scene = new Scene(pane, windowWidth, windowHeight);
+        // TOD DO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
+        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
+        tierGrid.getColumnConstraints().add(new ColumnConstraints(680));
+        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
+        makeTierListUI();
+        return scene;
+    }
+
+    // Create and return the Tier List's user interface
+    public void  makeTierListUI() {
+        tierGrid.getChildren().clear();
+        imageGrid.getChildren().clear();
+        List<Tier> tiers= tierList.getTiers();
+        int redLevel= 255;
         // The loop adds nodes to the tier list GridPane and stylizes them as well
         for (int i=0;i<tiers.size();i++) {
             int index = i;
             nameBoxes.add(new HBox(new Label(tiers.get(i).getTierTitle())));
             tierGrid.add(nameBoxes.get(i),0,i);
 
-            tierBoxes.add(new HBox());
+            ImageView imgView= new ImageView(new Image("D:\\Programs\\CSC 436\\Projects\\InProgress\\team-team-top-tier\\Tier LIst Maker\\src\\main\\java\\csc436\\Images\\addImage.png", 120,120, false,true));
+            tierBoxes.add(new HBox(imgView));
             tierGrid.add(tierBoxes.get(i),1,i);
 
+            imgView.setOnDragOver((newEvent) -> {
+                if (newEvent.getDragboard().hasImage()){
+                    newEvent.acceptTransferModes(TransferMode.MOVE);
+                }
+            });
+
+            imgView.setOnDragDropped((newEvent)  -> {
+                Image newImage = newEvent.getDragboard().getImage();
+                imgView.setImage(newImage);
+            });
+
+
+            // Options Button code section
             Button options = new Button("Options");
             //HBox button = new HBox(options);
             //button.setAlignment(Pos.CENTER);
@@ -191,7 +251,6 @@ public class TierListUI {
 
             // Modifies the tiers themselves
             tierBoxes.get(i).setAlignment(Pos.CENTER_LEFT);
-            tierBoxes.get(i).setPadding(new Insets(35,0,35,0));
             tierBoxes.get(i).setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
 
             // Modifies the option boxes on the right
@@ -201,41 +260,21 @@ public class TierListUI {
 
         for (int i=0; i<3;i++){
             for (int j=0; j<10;j++){
-                imageGrid.add(new HBox(new Label("Image")),j,i);
+                Image heldImage= new Image("D:\\Programs\\CSC 436\\Projects\\InProgress\\team-team-top-tier\\Tier LIst Maker\\src\\main\\java\\csc436\\Images\\Chimp.jpg",120.0,120.0,false,true);
+                ImageView view= new ImageView(heldImage);
+                imageGrid.add(view,j,i);
+
+                view.setOnDragDetected((event) -> {
+                    Dragboard dBoard= view.startDragAndDrop(TransferMode.MOVE);
+                   ClipboardContent clipCont= new ClipboardContent();
+                   clipCont.putImage(view.getImage());
+                   dBoard.setContent(clipCont);
+
+                   event.consume();
+                });
             }
         }
 
-        // TOD DO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
-        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
-        tierGrid.getColumnConstraints().add(new ColumnConstraints(680));
-        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
-
-        imageGrid.setHgap(75);
-        imageGrid.setVgap(75);
-
-        pane.setTop(titleBox);
-        pane.setCenter(gridBox);
-
-        // set the Export button pane
-        ExportUI exportButt = new ExportUI(tierGrid);
-        pane.setBottom(exportButt.getExportUI());
-
-        // Position title and grids
-        pane.setMargin(titleBox, new Insets(10,0,40,0));
-        gridBox.setMargin(tierGrid, new Insets(00,0,40,0));
-
-        titleBox.setAlignment(Pos.TOP_CENTER);
-        tierGrid.setAlignment(Pos.TOP_CENTER);
-        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
-
-        pane.setStyle("-fx-background-color: black");
-
-        title.setStyle("-fx-text-fill: white; -fx-font-family: impact");
-        title.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
-
-        Scene scene= new Scene(pane, windowWidth, windowHeight);
-
-        return scene;
     }
 
     /**
@@ -246,6 +285,8 @@ public class TierListUI {
     private void deleteTier(Tier tier, Stage newTierStage){
         tierList.getTiers().remove(tier);
         newTierStage.close();
+        //TierListMaker.changeScenes(getTierListUI());
+        makeTierListUI();
     }
 
     /**
@@ -283,6 +324,8 @@ public class TierListUI {
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
         }
+        //TierListMaker.changeScenes(getTierListUI());
+        makeTierListUI();
     }
 
     /**
@@ -316,6 +359,8 @@ public class TierListUI {
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
         }
+        //TierListMaker.changeScenes(getTierListUI());
+        makeTierListUI();
     }
 
     /**
@@ -349,5 +394,7 @@ public class TierListUI {
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
         }
+        //TierListMaker.changeScenes(getTierListUI());
+        makeTierListUI();
     }
 }
