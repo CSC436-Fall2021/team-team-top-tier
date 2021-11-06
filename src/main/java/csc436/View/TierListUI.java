@@ -20,6 +20,9 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -106,12 +109,33 @@ public class TierListUI {
         // The loop adds nodes to the tier list GridPane and stylizes them as well
         for (int i=0;i<tiers.size();i++) {
             int index = i;
-            nameBoxes.add(new HBox(new Label(tiers.get(i).getTierTitle())));
-            tierGrid.add(nameBoxes.get(i),0,i);
+            Label tierTitleLabel = new Label(tiers.get(index).getTierTitle());
+            HBox hBoxTierTitle = new HBox(tierTitleLabel);
 
-            ImageView imgView= new ImageView(new Image("D:\\Programs\\CSC 436\\Projects\\InProgress\\team-team-top-tier\\Tier LIst Maker\\src\\main\\java\\csc436\\Images\\addImage.png", 120,120, false,true));
-            tierBoxes.add(new HBox(imgView));
-            tierGrid.add(tierBoxes.get(i),1,i);
+            // Modifies tier name boxes
+            hBoxTierTitle.setAlignment(Pos.CENTER);
+            tierTitleLabel.setStyle(
+                    "-fx-text-fill: white;"+"-fx-font-size: 50px;"+"-fx-font-weight: bold;");
+            hBoxTierTitle.setStyle("-fx-background-color: rgb("+redLevel+",0,0);" +
+                    "-fx-border-color: white;" + "-fx-border-width: 3;");
+            redLevel-=40;
+            tierGrid.add(hBoxTierTitle,0, index);
+
+            //Gets the "Add" button image path.
+            InputStream addStream = null;
+            try {
+                addStream = new FileInputStream("src/main/java/csc436/Images/addImage.png");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            Image addImg = new Image(addStream, 120,120, false,true);
+            ImageView imgView= new ImageView(addImg);
+            HBox hBoxImageView = new HBox(imgView);
+
+            // Modifies the tiers themselves
+            hBoxImageView.setAlignment(Pos.CENTER_LEFT);
+            hBoxImageView.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
+            tierGrid.add(hBoxImageView,1, index);
 
             imgView.setOnDragOver((newEvent) -> {
                 if (newEvent.getDragboard().hasImage()){
@@ -132,6 +156,7 @@ public class TierListUI {
             //button.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
 
             options.setOnAction((event) -> {
+                int thisTierIndex = index;
                 selectedTier = tiers.get(index);
                 selectedTierTitle = selectedTier.getTierTitle();
                 final Stage newTierListStage = new Stage();
@@ -221,12 +246,12 @@ public class TierListUI {
 
                 //Event handlers to open the selected TierList.
                 addUpBtn.setOnAction((event2) -> {
-                    addTopTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, indexOfSelectedTier);
+                    addTopTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, thisTierIndex);
                 });
 
                 //Event handlers to open the selected TierList.
                 addDownBtn.setOnAction((event2) -> {
-                    addBottonTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, indexOfSelectedTier);
+                    addBottonTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, thisTierIndex);
                 });
 
                 Scene dialogScene = new Scene(newTierListPane, 300, 300);
@@ -234,34 +259,24 @@ public class TierListUI {
                 newTierListStage.show();
             });
             buttonBoxes.add(new VBox(options));
-            //buttonBoxes.add(new VBox(new Button("Add Tier"),new Button("Delete Tier")));
-            tierGrid.add(buttonBoxes.get(i),2, i);
-        }
-
-        // TO DO: Modify this to be user-selected colors
-        int redLevel= 255;
-        for (int i=0;i<nameBoxes.size();i++){
-            // Modifies tier name boxes
-            nameBoxes.get(i).setAlignment(Pos.CENTER);
-            ((Label) nameBoxes.get(i).getChildren().get(0)).setStyle(
-                    "-fx-text-fill: white;"+"-fx-font-size: 50px;"+"-fx-font-weight: bold;");
-            nameBoxes.get(i).setStyle("-fx-background-color: rgb("+redLevel+",0,0);" +
-                    "-fx-border-color: white;" + "-fx-border-width: 3;");
-            redLevel-=40;
-
-            // Modifies the tiers themselves
-            tierBoxes.get(i).setAlignment(Pos.CENTER_LEFT);
-            tierBoxes.get(i).setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
-
+            VBox vBoxOptionsBtn = new VBox(options);
             // Modifies the option boxes on the right
-            buttonBoxes.get(i).setAlignment(Pos.CENTER);
-            buttonBoxes.get(i).setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
+            vBoxOptionsBtn.setAlignment(Pos.CENTER);
+            vBoxOptionsBtn.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
+            tierGrid.add(vBoxOptionsBtn,2, index);
         }
 
         for (int i=0; i<3;i++){
             for (int j=0; j<10;j++){
-                Image heldImage= new Image("D:\\Programs\\CSC 436\\Projects\\InProgress\\team-team-top-tier\\Tier LIst Maker\\src\\main\\java\\csc436\\Images\\Chimp.jpg",120.0,120.0,false,true);
-                ImageView view= new ImageView(heldImage);
+                //Gets the "Chimp" image path.
+                InputStream chimpStream = null;
+                try {
+                    chimpStream = new FileInputStream("src/main/java/csc436/Images/Chimp.jpg");
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                Image chimpImg = new Image(chimpStream, 120,120, false,true);
+                ImageView view= new ImageView(chimpImg);
                 imageGrid.add(view,j,i);
 
                 view.setOnDragDetected((event) -> {
@@ -351,7 +366,7 @@ public class TierListUI {
         if (!exists){
             //Creates a new TierList and adds it to the TierList List of the user's account.
             Tier newTier = new Tier(title, index + 1);
-            tierList.getTiers().add(index, newTier);
+            tierList.getTiers().add(index + 1, newTier);
             //Creates a new TierListUI and displayed the TierList.
             newTierListStage.close();
         }else{//If Title exists, display error message.
