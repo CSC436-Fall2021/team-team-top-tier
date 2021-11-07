@@ -63,14 +63,21 @@ public class TierListUI {
         tierGrid= new GridPane();
         imageGrid = new GridPane();
 
-        //ScrollPane added for Tier Lists
+        //ScrollPane added for tiers section
         ScrollPane tierGridScroll = new ScrollPane(tierGrid);
         tierGridScroll.setFitToHeight(true);
         tierGridScroll.setFitToWidth(true);
         tierGridScroll.setStyle("-fx-background: black; -fx-border-color: black;");
         HBox scrollPane = new HBox(tierGridScroll);
 
-        VBox gridBox= new VBox(scrollPane,imageGrid);
+        //ScrollPane added for images section
+        ScrollPane imageGridScroll = new ScrollPane(imageGrid);
+        imageGridScroll.setFitToHeight(true);
+        imageGridScroll.setFitToWidth(true);
+        imageGridScroll.setStyle("-fx-background: black; -fx-border-color: black;");
+        HBox imageScrollPane = new HBox(imageGridScroll);
+
+        VBox gridBox= new VBox(scrollPane,imageScrollPane);
 
         Label title= new Label(tierList.getTierListTitle());
         HBox titleBox= new HBox(title);
@@ -90,10 +97,11 @@ public class TierListUI {
         // Position title and grids
         pane.setMargin(titleBox, new Insets(10,0,40,0));
         gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
+        gridBox.setMargin(imageScrollPane, new Insets(0,0,40,0));
 
         titleBox.setAlignment(Pos.TOP_CENTER);
         scrollPane.setAlignment(Pos.TOP_CENTER);
-        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
+        imageScrollPane.setAlignment(Pos.BOTTOM_CENTER);
 
         pane.setStyle("-fx-background-color: black");
 
@@ -115,6 +123,7 @@ public class TierListUI {
         imageGrid.getChildren().clear();
         List<Tier> tiers= tierList.getTiers();
         int redLevel= 255;
+
         // The loop adds nodes to the tier list GridPane and stylizes them as well
         for (int i=0;i<tiers.size();i++) {
             int index = i;
@@ -155,6 +164,7 @@ public class TierListUI {
             imgView.setOnDragDropped((newEvent)  -> {
                 Image newImage = newEvent.getDragboard().getImage();
                 imgView.setImage(newImage);
+                newEvent.setDropCompleted(true);
             });
 
 
@@ -295,6 +305,13 @@ public class TierListUI {
                    dBoard.setContent(clipCont);
 
                    event.consume();
+                });
+
+                view.setOnDragDone((event) -> {
+                    if (event.getTransferMode() == TransferMode.MOVE) {
+                        imageGrid.getChildren().remove(view);
+                    }
+                    event.consume();
                 });
             }
         }
