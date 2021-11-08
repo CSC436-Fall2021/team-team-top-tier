@@ -1,5 +1,6 @@
 package csc436.View;
 
+import csc436.Model.Picture;
 import csc436.Model.Tier;
 import csc436.Model.TierList;
 import javafx.geometry.Insets;
@@ -11,6 +12,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -21,6 +24,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -164,7 +168,12 @@ public class TierListUI {
             });
 
             imgView.setOnDragDropped((newEvent)  -> {
+
                 Image newImage = newEvent.getDragboard().getImage();
+
+                imgView.setFitHeight(120);
+                imgView.setFitWidth(120);
+
                 imgView.setImage(newImage);
 
                 imgView.setOnMouseClicked((event) -> {

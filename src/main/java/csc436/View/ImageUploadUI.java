@@ -14,6 +14,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -307,12 +309,14 @@ public class ImageUploadUI extends Application {
                 ClipboardContent clipCont= new ClipboardContent();
                 clipCont.putImage(pImageView.getImage());
                 dBoard.setContent(clipCont);
+
                 event.consume();
             });
 
             pImageView.setOnDragDone((event) -> {
                     if (event.getTransferMode() == TransferMode.MOVE) {
                         grid.getChildren().remove(pImageView);
+                        list.remove(p);
                     }
                     event.consume();
             });
@@ -438,4 +442,5 @@ public class ImageUploadUI extends Application {
 
     public Button getImageUploadButt() { return importButt; }
     public GridPane getGrid() { return grid; }
+    public ArrayList<Picture> getList() { return list; }
 }
