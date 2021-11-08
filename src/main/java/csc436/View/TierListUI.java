@@ -315,7 +315,6 @@ public class TierListUI {
                 });
             }
         }
-
     }
 
     /**
