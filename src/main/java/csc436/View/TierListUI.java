@@ -67,6 +67,8 @@ public class TierListUI {
 
         //ScrollPane added for tiers section
         ScrollPane tierGridScroll = new ScrollPane(tierGrid);
+        tierGridScroll.setPrefViewportHeight(500);
+        tierGridScroll.setPrefViewportWidth(1080);
         tierGridScroll.setFitToHeight(true);
         tierGridScroll.setFitToWidth(true);
         tierGridScroll.setStyle("-fx-background: black; -fx-border-color: black;");
@@ -164,6 +166,13 @@ public class TierListUI {
             imgView.setOnDragDropped((newEvent)  -> {
                 Image newImage = newEvent.getDragboard().getImage();
                 imgView.setImage(newImage);
+
+                imgView.setOnMouseClicked((event) -> {
+                    if (!imgView.getImage().equals(addImg)) {
+                        System.out.println("Deleted Image.");
+                        imgView.setImage(addImg);
+                    }
+                });
                 newEvent.setDropCompleted(true);
             });
 
