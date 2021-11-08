@@ -1,6 +1,7 @@
 package csc436.View;
 
 import csc436.Model.Picture;
+import csc436.Model.TierList;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -47,6 +48,9 @@ public class ImageUploadUI extends Application {
 
     private Button importButt;
 
+    TierList tierList;
+    GridPane tierGrid;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -84,15 +88,20 @@ public class ImageUploadUI extends Application {
     /**
      * Constructor used in TierListUI to create the image upload button
      *
-     * @param tierListName is used to save the serializable file name
+     * @param tierList the tierList object
+     * @param tierGrid
+     * @param imageGrid
      */
-    public ImageUploadUI(String tierListName, GridPane imageGrid) {
-        fileName = tierListName + ".ser";
+    public ImageUploadUI(TierList tierList, GridPane tierGrid, GridPane imageGrid) {
+        this.tierList = tierList;
+        this.tierGrid = tierGrid;
+
+        fileName = this.tierList.getTierListTitle() + ".ser";
         grid = imageGrid;
         createImportButt();
         list = loadPictures(fileName);
 //        drawPictures(imageGrid);
-        drawPicturesAsImages(imageGrid);
+        drawPicturesAsImages(this.tierGrid);
     }
 
     /**
@@ -171,6 +180,7 @@ public class ImageUploadUI extends Application {
                 if (!edit) {
                     list.add(pic);
                 }
+
                 drawPicturesAsImages(grid);
                 savePictures(list, fileName);
                 imageCropUI.close();
@@ -275,7 +285,18 @@ public class ImageUploadUI extends Application {
         imageCropUI.show();
     }
 
-    public void drawPicturesAsImages(GridPane grid) {
+    public void drawPicturesAsImages(GridPane tierGrid) {
+        grid.getChildren().clear();
+
+        // set the Export Button
+        ExportUI exportButtUI = new ExportUI(tierGrid);
+        Button exportButt = exportButtUI.getExportButton();
+        grid.add(new HBox(exportButt),8,0);
+
+        // set the Import Images button
+        Button importButt = getImageUploadButt();
+        grid.add(new HBox(importButt),9,0);
+
         //Draw all the Pictures currently in the list!
         int y = 1;
         int x = 0;
@@ -290,12 +311,12 @@ public class ImageUploadUI extends Application {
             });
 
             pImageView.setOnDragDone((event) -> {
-                if (event.getTransferMode() == TransferMode.MOVE) {
-                    grid.getChildren().remove(pImageView);
-                }
-                event.consume();
-                list.remove(p);
+                    if (event.getTransferMode() == TransferMode.MOVE) {
+                        grid.getChildren().remove(pImageView);
+                    }
+                    event.consume();
             });
+
             EventHandler<ActionEvent> editPicture = new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
@@ -416,4 +437,5 @@ public class ImageUploadUI extends Application {
     }
 
     public Button getImageUploadButt() { return importButt; }
+    public GridPane getGrid() { return grid; }
 }
