@@ -135,6 +135,7 @@ public class Tier implements Serializable {
         }
     }
 
+
     @Override
     public String toString() {
         String s = "Tier Title: " + tierTitle + "\nPictures: " + pictures.toString() + "\nTier Title CSS: " + tierTitleStyle

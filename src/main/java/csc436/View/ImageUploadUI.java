@@ -1,6 +1,7 @@
 package csc436.View;
 
 import csc436.Model.Picture;
+import csc436.Model.TierList;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -37,6 +38,9 @@ public class ImageUploadUI extends Application {
     GridPane grid;
 
     private Button importButt;
+
+    TierList tierList;
+    GridPane tierGrid;
 
     public static void main(String[] args) {
         launch(args);
@@ -75,15 +79,20 @@ public class ImageUploadUI extends Application {
     /**
      * Constructor used in TierListUI to create the image upload button
      *
-     * @param tierListName is used to save the serializable file name
+     * @param tierList the tierList object
+     * @param tierGrid
+     * @param imageGrid
      */
-    public ImageUploadUI(String tierListName, GridPane imageGrid) {
-        fileName = tierListName + ".ser";
+    public ImageUploadUI(TierList tierList, GridPane tierGrid, GridPane imageGrid) {
+        this.tierList = tierList;
+        this.tierGrid = tierGrid;
+
+        fileName = this.tierList.getTierListTitle() + ".ser";
         grid = imageGrid;
         createImportButt();
         list = loadPictures(fileName);
 //        drawPictures(imageGrid);
-        drawPicturesAsImages(imageGrid);
+        drawPicturesAsImages(this.tierGrid);
     }
 
     /**
@@ -137,7 +146,7 @@ public class ImageUploadUI extends Application {
                     list.add(pic);
                 }
 //                drawPictures(grid);
-                drawPicturesAsImages(grid);
+                drawPicturesAsImages(tierGrid);
                 savePictures(list, fileName);
                 imageCropUI.close();
             }
@@ -212,6 +221,8 @@ public class ImageUploadUI extends Application {
     }
 
     public void drawPictures(GridPane grid) {
+        grid.getChildren().clear();
+
         //Draw all the Pictures currently in the list!
         int y = 1;
         int x = 0;
@@ -235,28 +246,39 @@ public class ImageUploadUI extends Application {
         } // for end
     }
 
-    public void drawPicturesAsImages(GridPane grid) {
+    public void drawPicturesAsImages(GridPane tierGrid) {
+        grid.getChildren().clear();
+
+        // set the Export Button
+        ExportUI exportButtUI = new ExportUI(tierGrid);
+        Button exportButt = exportButtUI.getExportButton();
+        grid.add(new HBox(exportButt),8,0);
+
+        // set the Import Images button
+        Button importButt = getImageUploadButt();
+        grid.add(new HBox(importButt),9,0);
+
         //Draw all the Pictures currently in the list!
         int y = 1;
         int x = 0;
         for (Picture p : list) {
             ImageView pImageView = p.getCroppedImage();
             pImageView.setOnDragDetected((event) -> {
-                Dragboard dBoard= pImageView.startDragAndDrop(TransferMode.MOVE);
-                ClipboardContent clipCont= new ClipboardContent();
-                clipCont.putImage(pImageView.getImage());
-                dBoard.setContent(clipCont);
+                    Dragboard dBoard= pImageView.startDragAndDrop(TransferMode.MOVE);
+                    ClipboardContent clipCont= new ClipboardContent();
+                    clipCont.putImage(pImageView.getImage());
+                    dBoard.setContent(clipCont);
 
-                event.consume();
+                    event.consume();
             });
 
             pImageView.setOnDragDone((event) -> {
-                if (event.getTransferMode() == TransferMode.MOVE) {
-                    grid.getChildren().remove(pImageView);
-                }
-                event.consume();
-                list.remove(p);
+                    if (event.getTransferMode() == TransferMode.MOVE) {
+                        grid.getChildren().remove(pImageView);
+                    }
+                    event.consume();
             });
+
             EventHandler<ActionEvent> editPicture = new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
@@ -319,4 +341,5 @@ public class ImageUploadUI extends Application {
     }
 
     public Button getImageUploadButt() { return importButt; }
+    public GridPane getGrid() { return grid; }
 }

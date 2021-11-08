@@ -20,6 +20,7 @@ public class TierList implements Serializable {
     private String tierListTitle;
     private List<Tier> tiers;
     private String tierListStyle;
+    private List<String> tagList;
 
     public TierList(String title) {
         tierListTitle = title;
@@ -29,6 +30,7 @@ public class TierList implements Serializable {
         tiers.add(new Tier("A", 1));
         tiers.add(new Tier("B", 2));
         tiers.add(new Tier("C", 3));
+        tagList = new ArrayList<String>();
     }
 
     /**
@@ -101,4 +103,20 @@ public class TierList implements Serializable {
         }
     }
 
+    /**
+     * Add a tag to a tier list
+     * @param tag
+     */
+    public void addTag(String tag) {
+        if (!tagList.contains(tag)) {
+            tagList.add(tag);
+        }
+    }
+    public void removeTag(String tag) {
+        if (tagList.contains(tag)) {
+            tagList.remove(tag);
+        }
+    }
+
+    public List<String> getTagList() { return tagList; }
 }
