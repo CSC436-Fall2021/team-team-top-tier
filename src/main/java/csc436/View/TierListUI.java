@@ -52,6 +52,8 @@ public class TierListUI {
     private GridPane tierGrid;
     private GridPane imageGrid;
 
+    private ImageUploadUI imageUploadUI;
+
     public TierListUI(TierList tierList){
         this.tierList= tierList;
         windowWidth= 1080;
@@ -109,6 +111,8 @@ public class TierListUI {
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(680));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
+
+        getImageUI();
         makeTierListUI();
         return scene;
     }
@@ -280,7 +284,44 @@ public class TierListUI {
             vBoxOptionsBtn.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
             tierGrid.add(vBoxOptionsBtn,2, index);
         }
-        getImageUI();
+
+//        for (int i=1; i<2;i++){
+//            for (int j=0; j<10;j++){
+//                addMonkey(i,j);
+//            }
+//        }
+//        addMonkey(2,0);
+//        addMonkey(2,1);
+        imageUploadUI.drawPicturesAsImages(tierGrid);
+    }
+
+    private void addMonkey(int i, int j) {
+        //Gets the "Chimp" image path.
+        InputStream chimpStream = null;
+        try {
+            chimpStream = new FileInputStream("src/main/java/csc436/Images/Chimp.jpg");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Image chimpImg = new Image(chimpStream, 120,120, false,true);
+        ImageView view= new ImageView(chimpImg);
+        imageGrid.add(view,j,i);
+
+        view.setOnDragDetected((event) -> {
+            Dragboard dBoard= view.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent clipCont= new ClipboardContent();
+            clipCont.putImage(view.getImage());
+            dBoard.setContent(clipCont);
+
+            event.consume();
+        });
+
+        view.setOnDragDone((event) -> {
+            if (event.getTransferMode() == TransferMode.MOVE) {
+                imageGrid.getChildren().remove(view);
+            }
+            event.consume();
+        });
     }
 
     private void getImageUI() {
@@ -290,19 +331,8 @@ public class TierListUI {
             imageGrid.getColumnConstraints().add(column);
         }
 
-        // set the draw image type
-        //TODO: add a radio button that changes how the images are drawn
-        // (either as Buttons - changeable or as ImageViews - draggable)
-
-        // set the Export Button
-        ExportUI exportButtUI = new ExportUI(tierGrid);
-        Button exportButt = exportButtUI.getExportButton();
-        imageGrid.add(new HBox(exportButt),8,0);
-
-        // set the Import Images button
-        ImageUploadUI imageUploadUI = new ImageUploadUI(tierList.getTierListTitle(), imageGrid);
-        Button importButt = imageUploadUI.getImageUploadButt();
-        imageGrid.add(new HBox(importButt),9,0);
+        imageUploadUI = new ImageUploadUI(tierList, tierGrid, imageGrid);
+        imageUploadUI.drawPicturesAsImages(tierGrid);
     }
 
     /**
