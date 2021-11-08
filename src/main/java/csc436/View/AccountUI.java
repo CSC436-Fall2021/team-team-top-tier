@@ -18,12 +18,16 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Program: AccountUI.java
  * Purpose: AccountUI class that contains a UI for the given user's Account.
@@ -202,6 +206,9 @@ public class AccountUI {
                 Button openBtn = new Button("Open");
                 Button deleteBtn = new Button("Delete");
                 Button updateBtn = new Button ("Update");
+                Text tagText = new Text();
+                ScrollPane tagScrollPane = new ScrollPane(tagText);
+                TextField tagTextField = new TextField();
 
                 //Sets the style of the labels and button.
                 newTierListText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 24));
@@ -209,6 +216,8 @@ public class AccountUI {
                 openBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
                 deleteBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
                 updateBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+                tagScrollPane.setStyle("-fx-font-size: 10pt; -fx-background-color:transparent;");
+                tagScrollPane.setPrefViewportWidth(200);
 
                 //Creates a VBox with all the Nodes.
                 HBox hBoxTierListText = new HBox(newTierListText);
@@ -217,7 +226,8 @@ public class AccountUI {
                 GridPane gridPaneBtns = new GridPane();
                 gridPaneBtns.setHgap(25);
                 HBox hBoxBtns = new HBox(gridPaneBtns);
-                VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxBtns);
+                HBox hBoxTag = new HBox(tagScrollPane, tagTextField);
+                VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxBtns, hBoxTag);
 
                 //Position of Nodes.
                 hBoxTierListText.setAlignment(Pos.CENTER);
@@ -227,9 +237,11 @@ public class AccountUI {
                 vBoxNewTierList.setMargin(hBoxErrorMsg, new Insets(5, 0, 0, 0));
                 vBoxNewTierList.setMargin(hBoxTierList, new Insets(10, 0, 10, 0));
                 vBoxNewTierList.setMargin(hBoxBtns, new Insets(10, 0, 10, 0));
+                vBoxNewTierList.setMargin(hBoxTag, new Insets(10, 0, 10, 0));
 
                 //Size of textFields.
                 newTierListTitleField.setPrefWidth(100);
+                tagTextField.setPrefWidth(100);
                 //Adding H and V gaps to components.
                 newTierList.setHgap(10);
                 newTierList.setVgap(10);
@@ -266,6 +278,12 @@ public class AccountUI {
                 Scene dialogScene = new Scene(newTierListPane, 300, 200);
                 newTierListStage.setScene(dialogScene);
                 newTierListStage.show();
+
+                tagTextField.setOnKeyPressed((event3) -> {
+                    if (event3.getCode() == KeyCode.ENTER) {
+                        addTierListTag(clickedTierList, tagTextField.getText(), tagText);
+                    }
+                });
             });
 
             pane.getChildren().addAll(button);
@@ -485,5 +503,18 @@ public class AccountUI {
         TierListUI tierListUI = new TierListUI(tierList);
         newTierListStage.close();
         TierListMaker.changeScenes(tierListUI.getTierListUI());
+    }
+
+    private void addTierListTag(TierList tierList, String tag, Text tagText) {
+        tierList.addTag(tag);
+        updateTags(tierList, tagText);
+    }
+    private void updateTags(TierList tierList, Text tagText) {
+        String tagContent = "";
+        List<String> tagList =  tierList.getTagList();
+        for (String tag: tagList) {
+            tagContent += "#" + tag + "  ";
+        }
+        tagText.setText(tagContent);
     }
 }
