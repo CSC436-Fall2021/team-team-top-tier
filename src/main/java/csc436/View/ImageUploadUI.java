@@ -301,9 +301,9 @@ public class ImageUploadUI extends Application {
             pImageView.setOnDragDetected((event) -> {
                 Dragboard dBoard= pImageView.startDragAndDrop(TransferMode.MOVE);
                 ClipboardContent clipCont= new ClipboardContent();
-                clipCont.putImage(pImageView.getImage());
+                clipCont.put(Picture.PICTURE_FORMAT, p);
                 dBoard.setContent(clipCont);
-
+                dBoard.setDragView(p.getCroppedImage().getImage());
                 event.consume();
             });
 
@@ -311,6 +311,7 @@ public class ImageUploadUI extends Application {
                     if (event.getTransferMode() == TransferMode.MOVE) {
                         grid.getChildren().remove(pImageView);
                         list.remove(p);
+                        drawPicturesAsImages(grid);
                     }
                     event.consume();
             });
