@@ -9,30 +9,24 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 
-public class Picture implements Serializable{
+public class Picture implements Serializable, Comparable {
 
     public static final int IMAGE_CROP_SIZE = 75;
+    public PictureSortFlag sortMethod = PictureSortFlag.ByName;
 
     private String path;
     private String name;
+    private long timeIn;
+    private int bad;
     private double width, height; //actual image information
     private double x1, y1;  //crop parameters (set by user)
     private double cropDemensions;
-
-    /**
-     * Picture(String path, String name) constructor
-     * @param path - the file path of the picture
-     * @param name - the given name of the picture
-     */
-    public Picture(String path, String name) {
-        this.path = path;
-        this.name = name;
-        createImage();
-    } // Constructor end
 
     /**
      * Picture(String path, String name) alternative constructor (without name)
@@ -41,6 +35,7 @@ public class Picture implements Serializable{
     public Picture(String path) {
         this.path = path;
         this.name = path;
+        timeIn = System.currentTimeMillis();
         Image image = null;
         try {
             image = new Image(new FileInputStream(path));
@@ -54,6 +49,7 @@ public class Picture implements Serializable{
     public Picture(String path, double width, double height) {
         this.path = path;
         this.name = path;
+        timeIn = System.currentTimeMillis();
         Image image = null;
         try {
             image = new Image(new FileInputStream(path), width, height, true, true);
@@ -96,12 +92,25 @@ public class Picture implements Serializable{
         return view;
     }
 
+    public void setSortMethod(PictureSortFlag option) {
+        this.sortMethod = option;
+    }
+
     public void setSquareCrop(double x1, double y1) {
         this.x1 = x1;
         this.y1 = y1;
     }
 
     public void setCropDemensions(double dem) {
+        if(dem == 0) {
+            setSquareCrop(0, 0);
+            if(width < height) {
+                this.cropDemensions = width;
+            } else {
+                this.cropDemensions = height;
+            }
+            return;
+        }
         this.cropDemensions = dem;
     }
 
@@ -109,20 +118,34 @@ public class Picture implements Serializable{
         return cropDemensions;
     }
 
+    /**
+     * Getter and Setter Methods
+     */
+    public String getPath() { return path; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name;}
+    public long getUploadTime() { return timeIn; }
+    public double getWidth() { return width; }
+    public double getHeight() { return height; }
+    public String toString() { return this.path; }
     public double getCropX() {
         return x1;
     }
-
     public double getCropY() {
         return y1;
     }
 
-    /**
-     * Getter Methods
-     */
-    public String getPath() { return path; }
-    public String getName() { return name; }
-    public double getWidth() { return width; }
-    public double getHeight() { return height; }
-    public String toString() { return this.path; }
+    @Override
+    public int compareTo(@NotNull Object o) {
+        int retVal = 0;
+        switch (sortMethod) {
+            case ByDate:
+                retVal = ((Long)((Picture)o).getUploadTime()).compareTo(timeIn);
+                break;
+            case ByName:
+                retVal = ((Picture)o).getName().compareTo(name);
+                break;
+        }
+        return retVal;
+    }
 }
