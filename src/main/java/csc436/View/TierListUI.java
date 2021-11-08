@@ -90,6 +90,10 @@ public class TierListUI {
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
 
+        // set the Export button pane
+        ExportUI exportButt = new ExportUI(tierGrid);
+        pane.setBottom(exportButt.getExportUI());
+
         // Position title and grids
         pane.setMargin(titleBox, new Insets(10,0,40,0));
         gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
