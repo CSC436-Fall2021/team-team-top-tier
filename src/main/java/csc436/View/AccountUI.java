@@ -5,9 +5,11 @@ import csc436.Model.AccountCollection;
 import csc436.Model.TierList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -78,13 +80,19 @@ public class AccountUI {
         //Adding the components into a vbox.
         HBox hBoxUsername= new HBox(usrnameLabel);
         HBox hBoxTierLists = new HBox(tierLists);
+        ScrollPane scroll = new ScrollPane(hBoxTierLists);
+        scroll.setFitToHeight(true);
+        scroll.setStyle("-fx-background: crimson; -fx-border-color: crimson;");
+        HBox scrollPane = new HBox(scroll);
+        scrollPane.setStyle("-fx-background-color: crimson");
         HBox hBoxTierListText = new HBox(tierListsLabel);
         HBox hBoxLogOutBtn = new HBox(logoutBtn);
-        VBox vBox = new VBox(hBoxUsername, hBoxTierListText, hBoxTierLists, hBoxLogOutBtn);
+        VBox vBox = new VBox(hBoxUsername, hBoxTierListText, scrollPane, hBoxLogOutBtn);
 
         //Position of the Account components.
         hBoxUsername.setAlignment(Pos.CENTER);
         hBoxTierLists.setAlignment(Pos.CENTER);
+        scrollPane.setAlignment(Pos.CENTER);
         hBoxTierListText.setAlignment(Pos.CENTER_LEFT);
         hBoxLogOutBtn.setAlignment(Pos.CENTER);
         vBox.setMargin(hBoxTierListText, new Insets(25, 0, 25, 20));
@@ -112,6 +120,7 @@ public class AccountUI {
 
         //Displays the TierLists of the logged-in user.
         showTierLists();
+        //accountScene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
         return accountScene;
     }
 
