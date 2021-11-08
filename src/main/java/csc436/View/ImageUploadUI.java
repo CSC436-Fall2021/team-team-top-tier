@@ -229,9 +229,6 @@ public class ImageUploadUI extends Application {
                 double drag_width = drag.getX() - cropOriginX;
                 double drag_height = drag.getY() - cropOriginY;
                 if(drag_width < 0 && drag_height < 0) {
-                    System.out.print("NW: ");
-                    System.out.println(drag_width);
-                    System.out.println(drag_height);
                     drag_width = drag_width * -1;
                     drag_height= drag_height * -1;
                     if (drag_width < drag_height) {
@@ -242,7 +239,6 @@ public class ImageUploadUI extends Application {
                         crop.setY(drag.getY());
                     }
                 } else if(drag_width < 0) {
-                    System.out.println("SW");
                     crop.setY(cropOriginY);
                     drag_width = drag_width * -1;
                     if (drag_width < drag_height ) {
@@ -251,7 +247,6 @@ public class ImageUploadUI extends Application {
                         crop.setX(cropOriginX - (drag.getY() - cropOriginY));
                     }
                 } else if (drag_height < 0) {
-                    System.out.println("NE");
                     crop.setX(cropOriginX);
                     drag_height = drag_height * -1;
                     if (drag_width < drag_height ) {
@@ -260,7 +255,6 @@ public class ImageUploadUI extends Application {
                         crop.setY(drag.getY());
                     }
                 } else {
-                    System.out.println("SE");
                     crop.setX(cropOriginX);
                     crop.setY(cropOriginY);
                 }
