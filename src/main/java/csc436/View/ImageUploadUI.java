@@ -325,7 +325,7 @@ public class ImageUploadUI extends Application {
                 @Override
                 public void handle(ActionEvent event) {
                     doCropUI(p, true);
-                    savePictures(list, TEST_FILE);  //save image
+                    savePictures(list, fileName);  //save image
                 }
             };
 
@@ -340,7 +340,7 @@ public class ImageUploadUI extends Application {
                     if (result.isPresent()) {
                         p.setName(renamePopup.getEditor().getText());
                         drawPicturesAsImages(grid);
-                        savePictures(list, TEST_FILE);  //save image
+                        savePictures(list, fileName);  //save image
                     }
                 }
             };
