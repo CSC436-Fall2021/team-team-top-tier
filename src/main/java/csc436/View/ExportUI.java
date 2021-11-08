@@ -29,8 +29,9 @@ import javafx.stage.Stage;
 
 public class ExportUI {
 
-    BorderPane pane;
-    GridPane tierPane;
+    private BorderPane pane;
+    private GridPane tierPane;
+    private Button exportButt;
 
     /**
      * ExportUI takes the TierList borderpane to crop and save it.
@@ -45,7 +46,7 @@ public class ExportUI {
     }
 
     private void makeButton() {
-        Button exportButt = new Button();
+        exportButt = new Button();
         EventHandler<ActionEvent> exportEvent = actionEvent -> {
             // TODO: crop the scene
             // TODO: save the scene
@@ -76,5 +77,8 @@ public class ExportUI {
 
     public BorderPane getExportUI() {
         return pane;
+    }
+    public Button getExportButton() {
+        return exportButt;
     }
 }

@@ -10,7 +10,10 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -25,12 +28,15 @@ import java.util.ArrayList;
 public class ImageUploadUI extends Application {
 
     public static final String TEST_FILE = "fileName.ser";
+    public String fileName;
 
     private Stage stage;
     private ArrayList<Picture> list = new ArrayList<>();
 
     BorderPane pane;
     GridPane grid;
+
+    private Button importButt;
 
     public static void main(String[] args) {
         launch(args);
@@ -49,10 +55,43 @@ public class ImageUploadUI extends Application {
         grid.setPadding(new Insets(15, 15, 15, 15));
 
         list = loadPictures(TEST_FILE);
-        drawPictures(pane, grid);
+        drawPictures(grid);
 
-        Button importButt =  new Button("Import Images");
-        importButt.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
+        createImportButt();
+
+        // draw the importButt onto the scene
+        BorderPane secondPane = new BorderPane();
+        secondPane.setPadding(new Insets(10, 5, 5, 5));
+        secondPane.setCenter(importButt);
+        pane.setTop(secondPane);
+
+        //Show stage and set scene
+        Scene scene = new Scene(pane, 500, 500);
+
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    /**
+     * Constructor used in TierListUI to create the image upload button
+     *
+     * @param tierListName is used to save the serializable file name
+     */
+    public ImageUploadUI(String tierListName, GridPane imageGrid) {
+        fileName = tierListName + ".ser";
+        grid = imageGrid;
+        createImportButt();
+        list = loadPictures(fileName);
+//        drawPictures(imageGrid);
+        drawPicturesAsImages(imageGrid);
+    }
+
+    /**
+     * Create the importButton and set its event handler
+     */
+    public void createImportButt() {
+        importButt =  new Button("Import Images");
+//        importButt.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
         EventHandler<ActionEvent> importEvent = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -81,16 +120,6 @@ public class ImageUploadUI extends Application {
         };
 
         importButt.setOnAction(importEvent);
-        BorderPane secondPane = new BorderPane();
-        secondPane.setPadding(new Insets(10, 5, 5, 5));
-        secondPane.setCenter(importButt);
-        pane.setTop(secondPane);
-
-        //Show stage and set scene
-        Scene scene = new Scene(pane, 500, 500);
-
-        stage.setScene(scene);
-        stage.show();
     }
 
     public void doCropUI(Picture pic, Boolean edit) {
@@ -107,8 +136,9 @@ public class ImageUploadUI extends Application {
                 if (!edit) {
                     list.add(pic);
                 }
-                drawPictures(pane,  grid);
-                savePictures(list, TEST_FILE);
+//                drawPictures(grid);
+                drawPicturesAsImages(grid);
+                savePictures(list, fileName);
                 imageCropUI.close();
             }
         };
@@ -181,9 +211,9 @@ public class ImageUploadUI extends Application {
         imageCropUI.show();
     }
 
-    public void drawPictures(BorderPane pane, GridPane grid) {
+    public void drawPictures(GridPane grid) {
         //Draw all the Pictures currently in the list!
-        int y = 0;
+        int y = 1;
         int x = 0;
         for (Picture p : list) {
             EventHandler<ActionEvent> editPicture = new EventHandler<ActionEvent>() {
@@ -192,17 +222,54 @@ public class ImageUploadUI extends Application {
                     doCropUI(p, true);
                 }
             };
+            // picture is drawn onto a button
             Button picButt = new Button();
             picButt.setGraphic(p.getCroppedImage());
             picButt.setOnAction(editPicture);
             grid.add(picButt, x, y);
             x++;
-            if (x == 5) {
+            if (x == 10) {
                 y ++;
                 x = 0;
             }
         } // for end
-        pane.setCenter(grid);
+    }
+
+    public void drawPicturesAsImages(GridPane grid) {
+        //Draw all the Pictures currently in the list!
+        int y = 1;
+        int x = 0;
+        for (Picture p : list) {
+            ImageView pImageView = p.getCroppedImage();
+            pImageView.setOnDragDetected((event) -> {
+                Dragboard dBoard= pImageView.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent clipCont= new ClipboardContent();
+                clipCont.putImage(pImageView.getImage());
+                dBoard.setContent(clipCont);
+
+                event.consume();
+            });
+
+            pImageView.setOnDragDone((event) -> {
+                if (event.getTransferMode() == TransferMode.MOVE) {
+                    grid.getChildren().remove(pImageView);
+                }
+                event.consume();
+                list.remove(p);
+            });
+            EventHandler<ActionEvent> editPicture = new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    doCropUI(p, true);
+                }
+            };
+            grid.add(pImageView, x, y);
+            x++;
+            if (x == 10) {
+                y ++;
+                x = 0;
+            }
+        } // for end
     }
 
     public File doFilePickerUI() {
@@ -250,4 +317,6 @@ public class ImageUploadUI extends Application {
         }
         return null;
     }
+
+    public Button getImageUploadButt() { return importButt; }
 }
