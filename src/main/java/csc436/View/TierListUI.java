@@ -90,10 +90,6 @@ public class TierListUI {
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
 
-        // set the Export button pane
-        ExportUI exportButt = new ExportUI(tierGrid);
-        pane.setBottom(exportButt.getExportUI());
-
         // Position title and grids
         pane.setMargin(titleBox, new Insets(10,0,40,0));
         gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
@@ -284,74 +280,14 @@ public class TierListUI {
             vBoxOptionsBtn.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
             tierGrid.add(vBoxOptionsBtn,2, index);
         }
-
-//        //        imageGrid.setHgap(75);
-//        imageGrid.setVgap(75);
-//        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
-//        for (int i = 0; i < 10; i++) {
-//            ColumnConstraints column = new ColumnConstraints(120);
-//            imageGrid.getColumnConstraints().add(column);
-//        }
-//        // draw export button and the image upload
-//        getImageUI(imageGrid, tierGrid, pane);
-//
-//        // TOD DO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
-//        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
-//        tierGrid.getColumnConstraints().add(new ColumnConstraints(680));
-//        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
-//
-//
-//        pane.setTop(titleBox);
-//        pane.setCenter(gridBox);
-//
-//        // Position title and grids
-//        pane.setMargin(titleBox, new Insets(10,0,40,0));
-//        gridBox.setMargin(tierGrid, new Insets(00,0,40,0));
-
-        for (int i=0; i<3;i++){
-            for (int j=0; j<10;j++){
-                //Gets the "Chimp" image path.
-                InputStream chimpStream = null;
-                try {
-                    chimpStream = new FileInputStream("src/main/java/csc436/Images/Chimp.jpg");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Image chimpImg = new Image(chimpStream, 120,120, false,true);
-                ImageView view= new ImageView(chimpImg);
-                imageGrid.add(view,j,i);
-
-                view.setOnDragDetected((event) -> {
-                    Dragboard dBoard= view.startDragAndDrop(TransferMode.MOVE);
-                   ClipboardContent clipCont= new ClipboardContent();
-                   clipCont.putImage(view.getImage());
-                   dBoard.setContent(clipCont);
-
-                   event.consume();
-                });
-
-                view.setOnDragDone((event) -> {
-                    if (event.getTransferMode() == TransferMode.MOVE) {
-                        imageGrid.getChildren().remove(view);
-                    }
-                    event.consume();
-                });
-            }
-        }
-
-        title.setStyle("-fx-text-fill: white; -fx-font-family: impact");
-        title.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
-
-        Scene scene= new Scene(pane, windowWidth, windowHeight);
-
-        return scene;
+        getImageUI();
     }
 
-    private void getImageUI(GridPane imageGrid, GridPane tierGrid, BorderPane pane) {
-        for (int i=1; i<3;i++){
-            for (int j=0; j<10;j++){
-                imageGrid.add(new HBox(new Label("Image")),j,i);
-            }
+    private void getImageUI() {
+        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
+        for (int i = 0; i < 10; i++) {
+            ColumnConstraints column = new ColumnConstraints(120);
+            imageGrid.getColumnConstraints().add(column);
         }
 
         // set the draw image type

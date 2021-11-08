@@ -10,7 +10,10 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -237,13 +240,30 @@ public class ImageUploadUI extends Application {
         int y = 1;
         int x = 0;
         for (Picture p : list) {
+            ImageView pImageView = p.getCroppedImage();
+            pImageView.setOnDragDetected((event) -> {
+                Dragboard dBoard= pImageView.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent clipCont= new ClipboardContent();
+                clipCont.putImage(pImageView.getImage());
+                dBoard.setContent(clipCont);
+
+                event.consume();
+            });
+
+            pImageView.setOnDragDone((event) -> {
+                if (event.getTransferMode() == TransferMode.MOVE) {
+                    grid.getChildren().remove(pImageView);
+                }
+                event.consume();
+                list.remove(p);
+            });
             EventHandler<ActionEvent> editPicture = new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
                     doCropUI(p, true);
                 }
             };
-            grid.add(p.getCroppedImage(), x, y);
+            grid.add(pImageView, x, y);
             x++;
             if (x == 10) {
                 y ++;
