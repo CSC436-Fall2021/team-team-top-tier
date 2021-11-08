@@ -199,26 +199,24 @@ public class TierListUI {
             buttonBoxes.get(i).setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
         }
 
-        for (int i=0; i<3;i++){
-            for (int j=0; j<10;j++){
-                imageGrid.add(new HBox(new Label("Image")),j,i);
-            }
+//        imageGrid.setHgap(75);
+        imageGrid.setVgap(75);
+        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
+        for (int i = 0; i < 10; i++) {
+            ColumnConstraints column = new ColumnConstraints(120);
+            imageGrid.getColumnConstraints().add(column);
         }
+        // draw export button and the image upload
+        getImageUI(imageGrid, tierGrid, pane);
 
         // TOD DO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(680));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
 
-        imageGrid.setHgap(75);
-        imageGrid.setVgap(75);
 
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
-
-        // set the Export button pane
-        ExportUI exportButt = new ExportUI(tierGrid);
-        pane.setBottom(exportButt.getExportUI());
 
         // Position title and grids
         pane.setMargin(titleBox, new Insets(10,0,40,0));
@@ -236,6 +234,28 @@ public class TierListUI {
         Scene scene= new Scene(pane, windowWidth, windowHeight);
 
         return scene;
+    }
+
+    private void getImageUI(GridPane imageGrid, GridPane tierGrid, BorderPane pane) {
+        for (int i=1; i<3;i++){
+            for (int j=0; j<10;j++){
+                imageGrid.add(new HBox(new Label("Image")),j,i);
+            }
+        }
+
+        // set the draw image type
+        //TODO: add a radio button that changes how the images are drawn
+        // (either as Buttons - changeable or as ImageViews - draggable)
+
+        // set the Export Button
+        ExportUI exportButtUI = new ExportUI(tierGrid);
+        Button exportButt = exportButtUI.getExportButton();
+        imageGrid.add(new HBox(exportButt),8,0);
+
+        // set the Import Images button
+        ImageUploadUI imageUploadUI = new ImageUploadUI(tierList.getTierListTitle(), imageGrid);
+        Button importButt = imageUploadUI.getImageUploadButt();
+        imageGrid.add(new HBox(importButt),9,0);
     }
 
     /**
