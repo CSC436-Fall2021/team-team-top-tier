@@ -63,14 +63,21 @@ public class TierListUI {
         tierGrid= new GridPane();
         imageGrid = new GridPane();
 
-        //ScrollPane added for Tier Lists
+        //ScrollPane added for tiers section
         ScrollPane tierGridScroll = new ScrollPane(tierGrid);
         tierGridScroll.setFitToHeight(true);
         tierGridScroll.setFitToWidth(true);
         tierGridScroll.setStyle("-fx-background: black; -fx-border-color: black;");
         HBox scrollPane = new HBox(tierGridScroll);
 
-        VBox gridBox= new VBox(scrollPane,imageGrid);
+        //ScrollPane added for images section
+        ScrollPane imageGridScroll = new ScrollPane(imageGrid);
+        imageGridScroll.setFitToHeight(true);
+        imageGridScroll.setFitToWidth(true);
+        imageGridScroll.setStyle("-fx-background: black; -fx-border-color: black;");
+        HBox imageScrollPane = new HBox(imageGridScroll);
+
+        VBox gridBox= new VBox(scrollPane,imageScrollPane);
 
         Label title= new Label(tierList.getTierListTitle());
         HBox titleBox= new HBox(title);
@@ -83,17 +90,14 @@ public class TierListUI {
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
 
-        // set the Export button pane
-        ExportUI exportButt = new ExportUI(tierGrid);
-        pane.setBottom(exportButt.getExportUI());
-
         // Position title and grids
         pane.setMargin(titleBox, new Insets(10,0,40,0));
         gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
+        gridBox.setMargin(imageScrollPane, new Insets(0,0,40,0));
 
         titleBox.setAlignment(Pos.TOP_CENTER);
         scrollPane.setAlignment(Pos.TOP_CENTER);
-        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
+        imageScrollPane.setAlignment(Pos.BOTTOM_CENTER);
 
         pane.setStyle("-fx-background-color: black");
 
@@ -115,6 +119,7 @@ public class TierListUI {
         imageGrid.getChildren().clear();
         List<Tier> tiers= tierList.getTiers();
         int redLevel= 255;
+
         // The loop adds nodes to the tier list GridPane and stylizes them as well
         for (int i=0;i<tiers.size();i++) {
             int index = i;
@@ -155,6 +160,7 @@ public class TierListUI {
             imgView.setOnDragDropped((newEvent)  -> {
                 Image newImage = newEvent.getDragboard().getImage();
                 imgView.setImage(newImage);
+                newEvent.setDropCompleted(true);
             });
 
 
@@ -274,31 +280,29 @@ public class TierListUI {
             vBoxOptionsBtn.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
             tierGrid.add(vBoxOptionsBtn,2, index);
         }
+        getImageUI();
+    }
 
-        for (int i=0; i<3;i++){
-            for (int j=0; j<10;j++){
-                //Gets the "Chimp" image path.
-                InputStream chimpStream = null;
-                try {
-                    chimpStream = new FileInputStream("src/main/java/csc436/Images/Chimp.jpg");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Image chimpImg = new Image(chimpStream, 120,120, false,true);
-                ImageView view= new ImageView(chimpImg);
-                imageGrid.add(view,j,i);
-
-                view.setOnDragDetected((event) -> {
-                    Dragboard dBoard= view.startDragAndDrop(TransferMode.MOVE);
-                   ClipboardContent clipCont= new ClipboardContent();
-                   clipCont.putImage(view.getImage());
-                   dBoard.setContent(clipCont);
-
-                   event.consume();
-                });
-            }
+    private void getImageUI() {
+        imageGrid.setAlignment(Pos.BOTTOM_CENTER);
+        for (int i = 0; i < 10; i++) {
+            ColumnConstraints column = new ColumnConstraints(120);
+            imageGrid.getColumnConstraints().add(column);
         }
 
+        // set the draw image type
+        //TODO: add a radio button that changes how the images are drawn
+        // (either as Buttons - changeable or as ImageViews - draggable)
+
+        // set the Export Button
+        ExportUI exportButtUI = new ExportUI(tierGrid);
+        Button exportButt = exportButtUI.getExportButton();
+        imageGrid.add(new HBox(exportButt),8,0);
+
+        // set the Import Images button
+        ImageUploadUI imageUploadUI = new ImageUploadUI(tierList.getTierListTitle(), imageGrid);
+        Button importButt = imageUploadUI.getImageUploadButt();
+        imageGrid.add(new HBox(importButt),9,0);
     }
 
     /**
