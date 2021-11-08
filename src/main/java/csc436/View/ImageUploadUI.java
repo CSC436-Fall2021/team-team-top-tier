@@ -3,6 +3,7 @@ package csc436.View;
 import csc436.Model.Picture;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,10 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -66,7 +64,7 @@ public class ImageUploadUI extends Application {
         grid.setPadding(new Insets(15, 15, 15, 15));
 
         list = loadPictures(TEST_FILE);
-        drawPictures(grid);
+        drawPicturesAsImages(grid);
 
         createImportButt();
 
@@ -148,14 +146,12 @@ public class ImageUploadUI extends Application {
         Button save_butt = new Button("Save");
         Button cancel_butt = new Button("Cancel");
         buttons.getChildren().addAll(save_butt, cancel_butt);
-        //imagePain.setBottom(buttons);
 
         Group imageGroup = new Group(); //allows drawing on top of eachother
         imagePain.setCenter(imageGroup);
         ImageView img = new ImageView(pic.createImage());
         imageGroup.getChildren().add(img);
         Rectangle crop = new Rectangle(0,0,0,0);
-        //crop.widthProperty().bind(imagePain.widthProperty());
 
         crop.setStroke(Color.CADETBLUE);
         crop.setFill(null);
@@ -175,7 +171,6 @@ public class ImageUploadUI extends Application {
                 if (!edit) {
                     list.add(pic);
                 }
-//                drawPictures(grid);
                 drawPicturesAsImages(grid);
                 savePictures(list, fileName);
                 imageCropUI.close();
@@ -280,65 +275,6 @@ public class ImageUploadUI extends Application {
         imageCropUI.show();
     }
 
-    public void drawPictures(GridPane grid) {
-        //Draw all the Pictures currently in the list!
-        int y = 1;
-        int x = 0;
-        for (Picture p : list) {
-            EventHandler<ActionEvent> editPicture = new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    doCropUI(p, true);
-                }
-            };
-            EventHandler<ActionEvent> renamePicture = new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    TextInputDialog renamePopup = new TextInputDialog(p.getName());
-                    renamePopup.setTitle("Rename image");
-                    renamePopup.setHeaderText(null);
-                    renamePopup.setGraphic(null);
-                    Optional<String> result = renamePopup.showAndWait();
-                    if (result.isPresent()) {
-                        p.setName(renamePopup.getEditor().getText());
-                        drawPictures(grid);  //refesh UI
-                        savePictures(list, TEST_FILE);  //save image
-                    }
-                }
-            };
-
-            ContextMenu menu = new ContextMenu();
-            MenuItem editContext = new MenuItem("Edit");
-            editContext.setOnAction(editPicture);
-            MenuItem renameContext = new MenuItem("Rename");
-            renameContext.setOnAction(renamePicture);
-            menu.getItems().addAll(editContext, renameContext);
-
-            // picture is drawn onto a button
-            Button picButt = new Button();
-            picButt.setGraphic(p.getCroppedImage());
-            picButt.setOnAction(editPicture);
-            picButt.setContextMenu(menu);
-
-            Tooltip tip = new Tooltip(p.getName());
-            Tooltip.install(picButt, tip);
-            tip.setHideDelay(null);
-            picButt.setOnMouseMoved( ev -> {
-                tip.show(picButt, ev.getScreenX() + TOOLTIP_XOFFSET, ev.getScreenY() + TOOLTIP_YOFFSET);
-            });
-            picButt.setOnMouseExited( ev -> {
-                tip.hide();
-            });
-
-            grid.add(picButt, x, y);
-            x++;
-            if (x == 10) {
-                y ++;
-                x = 0;
-            }
-        } // for end
-    }
-
     public void drawPicturesAsImages(GridPane grid) {
         //Draw all the Pictures currently in the list!
         int y = 1;
@@ -350,7 +286,6 @@ public class ImageUploadUI extends Application {
                 ClipboardContent clipCont= new ClipboardContent();
                 clipCont.putImage(pImageView.getImage());
                 dBoard.setContent(clipCont);
-
                 event.consume();
             });
 
@@ -365,8 +300,49 @@ public class ImageUploadUI extends Application {
                 @Override
                 public void handle(ActionEvent event) {
                     doCropUI(p, true);
+                    savePictures(list, TEST_FILE);  //save image
                 }
             };
+
+            EventHandler<ActionEvent> renamePicture = new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    TextInputDialog renamePopup = new TextInputDialog(p.getName());
+                    renamePopup.setTitle("Rename image");
+                    renamePopup.setHeaderText(null);
+                    renamePopup.setGraphic(null);
+                    Optional<String> result = renamePopup.showAndWait();
+                    if (result.isPresent()) {
+                        p.setName(renamePopup.getEditor().getText());
+                        drawPicturesAsImages(grid);
+                        savePictures(list, TEST_FILE);  //save image
+                    }
+                }
+            };
+
+            ContextMenu menu = new ContextMenu();
+            MenuItem editContext = new MenuItem("Edit");
+            editContext.setOnAction(editPicture);
+            MenuItem renameContext = new MenuItem("Rename");
+            renameContext.setOnAction(renamePicture);
+            menu.getItems().addAll(editContext, renameContext);
+
+            pImageView.setOnContextMenuRequested(event -> {
+                menu.setY(event.getScreenY());
+                menu.setX(event.getScreenX());
+                menu.show(pImageView.getScene().getWindow());
+            });
+
+            Tooltip tip = new Tooltip(p.getName());
+            Tooltip.install(pImageView, tip);
+            tip.setHideDelay(null);
+            pImageView.setOnMouseMoved( ev -> {
+                tip.show(pImageView, ev.getScreenX() + TOOLTIP_XOFFSET, ev.getScreenY() + TOOLTIP_YOFFSET);
+            });
+            pImageView.setOnMouseExited( ev -> {
+                tip.hide();
+            });
+
             grid.add(pImageView, x, y);
             x++;
             if (x == 10) {
