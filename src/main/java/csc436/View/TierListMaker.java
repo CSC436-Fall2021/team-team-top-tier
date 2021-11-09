@@ -50,6 +50,7 @@ public class TierListMaker extends Application {
         appStage.setWidth(bounds.getWidth());
         appStage.setHeight(bounds.getHeight());
         appStage.setTitle("TierList Maker");
+        appStage.setMaximized(true);
         //appStage.setMaximized(false);
 
         //Initially sets scene to display LogIn Window.
@@ -70,7 +71,9 @@ public class TierListMaker extends Application {
      * @param scene The new Scene to be displayed.
      */
     public static void changeScenes(Scene scene) {
+        appStage.setMaximized(false);
         appStage.setScene(scene);
+        appStage.setMaximized(true);
     }
 
 }
