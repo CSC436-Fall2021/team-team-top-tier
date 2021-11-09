@@ -161,20 +161,20 @@ public class TierListUI {
             hBoxImageView.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
             tierGrid.add(hBoxImageView,1, index);
 
-            imgView.setOnDragOver((newEvent) -> {
+            imgView.setOnDragOver((newEvent) -> {;
                 if (newEvent.getDragboard().hasImage()){
+                    newEvent.acceptTransferModes(TransferMode.MOVE);
+                } else if (newEvent.getDragboard().getContentTypes().contains(Picture.PICTURE_FORMAT)){
                     newEvent.acceptTransferModes(TransferMode.MOVE);
                 }
             });
 
             imgView.setOnDragDropped((newEvent)  -> {
-
-                Image newImage = newEvent.getDragboard().getImage();
-
+                Picture p = (Picture) newEvent.getDragboard().getContent(Picture.PICTURE_FORMAT);
+                System.out.println(p.getName());
                 imgView.setFitHeight(120);
                 imgView.setFitWidth(120);
-
-                imgView.setImage(newImage);
+                imgView.setImage(p.getCroppedImage().getImage());
 
                 imgView.setOnMouseClicked((event) -> {
                     if (!imgView.getImage().equals(addImg)) {

@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.DataFormat;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
@@ -19,6 +20,9 @@ public class Picture implements Serializable, Comparable {
 
     public static final int IMAGE_CROP_SIZE = 75;
     public PictureSortFlag sortMethod = PictureSortFlag.ByName;
+
+    public static final DataFormat PICTURE_FORMAT = new DataFormat("Picture Object");
+
 
     private String path;
     private String name;
