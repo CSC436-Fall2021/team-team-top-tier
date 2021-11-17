@@ -19,7 +19,7 @@ import java.io.Serializable;
 public class Picture implements Serializable, Comparable {
 
     public static final int IMAGE_CROP_SIZE = 75;
-    public PictureSortFlag sortMethod = PictureSortFlag.ByName;
+    public static PictureSortFlag sortMethod = PictureSortFlag.ByName;
 
     public static final DataFormat PICTURE_FORMAT = new DataFormat("Picture Object");
 
@@ -96,8 +96,8 @@ public class Picture implements Serializable, Comparable {
         return view;
     }
 
-    public void setSortMethod(PictureSortFlag option) {
-        this.sortMethod = option;
+    public static void setSortMethod(PictureSortFlag option) {
+        sortMethod = option;
     }
 
     public void setSquareCrop(double x1, double y1) {

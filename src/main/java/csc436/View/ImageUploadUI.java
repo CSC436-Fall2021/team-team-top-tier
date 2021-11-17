@@ -1,6 +1,7 @@
 package csc436.View;
 
 import csc436.Model.Picture;
+import csc436.Model.PictureSortFlag;
 import csc436.Model.TierList;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -29,6 +30,8 @@ import org.kordamp.bootstrapfx.scene.layout.Panel;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 public class ImageUploadUI extends Application {
@@ -289,9 +292,40 @@ public class ImageUploadUI extends Application {
         Button exportButt = exportButtUI.getExportButton();
         grid.add(new HBox(exportButt),8,0);
 
+        //Set the Sort Button
+        ComboBox sortBtn = new ComboBox();
+        sortBtn.getItems().addAll("Date ↑", "Name ↑");
+        grid.add(new HBox(sortBtn), 9, 0);
+
+        //Event Handler for sortBtn
+        sortBtn.setOnAction((event) -> {
+            String value = (String) sortBtn.getValue();
+            //Debugging Prints Val
+            System.out.println(sortBtn.getValue());
+            //Debugging: Prints initial list order.
+            for (Picture p : list){
+                System.out.println(p.getName());
+            }
+            //Sorts by Name
+            if (value.contains("Name")){
+                Picture.setSortMethod(PictureSortFlag.ByName);
+                Collections.sort(list);
+                for (Picture p : list){
+                    System.out.println(p.getName());
+                }
+            }//Sorts by Date
+            else if (value.contains("Date")){
+                Picture.setSortMethod(PictureSortFlag.ByDate);
+                Collections.sort(list);
+                for (Picture p : list){
+                    System.out.println(p.getUploadTime());
+                }
+            }
+        });
+
         // set the Import Images button
         Button importButt = getImageUploadButt();
-        grid.add(new HBox(importButt),9,0);
+        grid.add(new HBox(importButt),10,0);
 
         //Draw all the Pictures currently in the list!
         int y = 1;
