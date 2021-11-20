@@ -68,6 +68,14 @@ public class Tier implements Serializable {
     }
 
     /**
+     * Purpose: Removes the selected image (aka Picture) from this Tier.
+     * @param pic
+     */
+    public void removePicture(Picture pic) {
+        pictures.remove(pic);
+    }
+
+    /**
      * Purpose: Returns the Tier css style for this Tier's rank/title.
      * @return tierTitleStyle CSS string which holds the styling of this Tier's rank/title.
      */

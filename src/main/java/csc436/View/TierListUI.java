@@ -41,6 +41,10 @@ import java.util.List;
  * @author AMir Ameri, Victor Jimenez, David Dung
  */
 public class TierListUI {
+
+    public static final int MAX_PICTURE_NUMBER = 6;
+    public static final int PICTURE_DRAW_SIZE = 120;
+
     private TierList tierList;
     private float windowWidth;
     private int  windowHeight;
@@ -91,9 +95,10 @@ public class TierListUI {
         HBox titleBox= new HBox(title);
 
         // Following lists  are usd to track the nodes which comprise the tier list itself
+        //TODO: cleanup - these aren't used
         nameBoxes = new LinkedList<HBox>();
         tierBoxes = new LinkedList<HBox>();
-        buttonBoxes = new LinkedList<VBox>();
+        buttonBoxes = new LinkedList<VBox>();  //this one is used once
 
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
@@ -113,14 +118,32 @@ public class TierListUI {
         title.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
 
         Scene scene = new Scene(pane, windowWidth, windowHeight);
-        // TOD DO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
+        // TODO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
-        tierGrid.getColumnConstraints().add(new ColumnConstraints(680));
+        tierGrid.getColumnConstraints().add(new ColumnConstraints(MAX_PICTURE_NUMBER * PICTURE_DRAW_SIZE + 6));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
 
         getImageUI();
         makeTierListUI();
         return scene;
+    }
+
+    private void refreshTier(HBox pictureList, Tier current, ImageView addIcon) {
+        pictureList.getChildren().clear();
+
+        for(Picture pic : current.getPictures()) {
+            ImageView picture = pic.getCroppedImage();
+            picture.setOnMouseClicked((event) -> {
+                current.removePicture(pic);
+                refreshTier(pictureList, current, addIcon);
+            });
+            picture.setFitHeight(PICTURE_DRAW_SIZE);
+            picture.setFitWidth(PICTURE_DRAW_SIZE);
+            pictureList.getChildren().add(picture);
+        }
+        if(pictureList.getChildren().size() < MAX_PICTURE_NUMBER) {
+            pictureList.getChildren().add(addIcon);
+        }
     }
 
     // Create and return the Tier List's user interface
@@ -152,16 +175,17 @@ public class TierListUI {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            Image addImg = new Image(addStream, 120,120, false,true);
-            ImageView imgView= new ImageView(addImg);
-            HBox hBoxImageView = new HBox(imgView);
+            Image addImg = new Image(addStream, PICTURE_DRAW_SIZE,PICTURE_DRAW_SIZE, false,true);
+            ImageView addIcon = new ImageView(addImg);
+            HBox hBoxImageView = new HBox();
+            refreshTier(hBoxImageView, tiers.get(index), addIcon);
 
             // Modifies the tiers themselves
             hBoxImageView.setAlignment(Pos.CENTER_LEFT);
             hBoxImageView.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
             tierGrid.add(hBoxImageView,1, index);
 
-            imgView.setOnDragOver((newEvent) -> {;
+            addIcon.setOnDragOver((newEvent) -> {;
                 if (newEvent.getDragboard().hasImage()){
                     newEvent.acceptTransferModes(TransferMode.MOVE);
                 } else if (newEvent.getDragboard().getContentTypes().contains(Picture.PICTURE_FORMAT)){
@@ -169,19 +193,12 @@ public class TierListUI {
                 }
             });
 
-            imgView.setOnDragDropped((newEvent)  -> {
-                Picture p = (Picture) newEvent.getDragboard().getContent(Picture.PICTURE_FORMAT);
-                System.out.println(p.getName());
-                imgView.setFitHeight(120);
-                imgView.setFitWidth(120);
-                imgView.setImage(p.getCroppedImage().getImage());
+            addIcon.setOnDragDropped((newEvent)  -> {
+                Picture newPic = (Picture) newEvent.getDragboard().getContent(Picture.PICTURE_FORMAT);
+                tiers.get(index).addPicture(newPic);
 
-                imgView.setOnMouseClicked((event) -> {
-                    if (!imgView.getImage().equals(addImg)) {
-                        System.out.println("Deleted Image.");
-                        imgView.setImage(addImg);
-                    }
-                });
+                refreshTier(hBoxImageView, tiers.get(index), addIcon);
+
                 newEvent.setDropCompleted(true);
             });
 
@@ -303,49 +320,13 @@ public class TierListUI {
             tierGrid.add(vBoxOptionsBtn,2, index);
         }
 
-//        for (int i=1; i<2;i++){
-//            for (int j=0; j<10;j++){
-//                addMonkey(i,j);
-//            }
-//        }
-//        addMonkey(2,0);
-//        addMonkey(2,1);
         imageUploadUI.drawPicturesAsImages(tierGrid);
-    }
-
-    private void addMonkey(int i, int j) {
-        //Gets the "Chimp" image path.
-        InputStream chimpStream = null;
-        try {
-            chimpStream = new FileInputStream("src/main/java/csc436/Images/Chimp.jpg");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        Image chimpImg = new Image(chimpStream, 120,120, false,true);
-        ImageView view= new ImageView(chimpImg);
-        imageGrid.add(view,j,i);
-
-        view.setOnDragDetected((event) -> {
-            Dragboard dBoard= view.startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent clipCont= new ClipboardContent();
-            clipCont.putImage(view.getImage());
-            dBoard.setContent(clipCont);
-
-            event.consume();
-        });
-
-        view.setOnDragDone((event) -> {
-            if (event.getTransferMode() == TransferMode.MOVE) {
-                imageGrid.getChildren().remove(view);
-            }
-            event.consume();
-        });
     }
 
     private void getImageUI() {
         imageGrid.setAlignment(Pos.BOTTOM_CENTER);
         for (int i = 0; i < 10; i++) {
-            ColumnConstraints column = new ColumnConstraints(120);
+            ColumnConstraints column = new ColumnConstraints(PICTURE_DRAW_SIZE);
             imageGrid.getColumnConstraints().add(column);
         }
 
@@ -472,5 +453,39 @@ public class TierListUI {
         }
         //TierListMaker.changeScenes(getTierListUI());
         makeTierListUI();
+    }
+
+    /**
+     * depreciated?
+     * @param i
+     * @param j
+     */
+    private void addMonkey(int i, int j) {
+        //Gets the "Chimp" image path.
+        InputStream chimpStream = null;
+        try {
+            chimpStream = new FileInputStream("src/main/java/csc436/Images/Chimp.jpg");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Image chimpImg = new Image(chimpStream, PICTURE_DRAW_SIZE,PICTURE_DRAW_SIZE, false,true);
+        ImageView view= new ImageView(chimpImg);
+        imageGrid.add(view,j,i);
+
+        view.setOnDragDetected((event) -> {
+            Dragboard dBoard= view.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent clipCont= new ClipboardContent();
+            clipCont.putImage(view.getImage());
+            dBoard.setContent(clipCont);
+
+            event.consume();
+        });
+
+        view.setOnDragDone((event) -> {
+            if (event.getTransferMode() == TransferMode.MOVE) {
+                imageGrid.getChildren().remove(view);
+            }
+            event.consume();
+        });
     }
 }
