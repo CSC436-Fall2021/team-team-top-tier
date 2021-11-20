@@ -94,12 +94,6 @@ public class TierListUI {
         Label title= new Label(tierList.getTierListTitle());
         HBox titleBox= new HBox(title);
 
-        // Following lists  are usd to track the nodes which comprise the tier list itself
-        //TODO: cleanup - these aren't used
-        nameBoxes = new LinkedList<HBox>();
-        tierBoxes = new LinkedList<HBox>();
-        buttonBoxes = new LinkedList<VBox>();  //this one is used once
-
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
 
@@ -202,12 +196,26 @@ public class TierListUI {
                 newEvent.setDropCompleted(true);
             });
 
+            //Gets the "Cog" button image path.
+            InputStream cogStream = null;
+            try {
+                cogStream = new FileInputStream("src/main/java/csc436/Images/white-cog.png");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            //ImageView for the options button (Cog button)
+            Image cogImg = new Image(cogStream);
+            //Creates ImageViews for white-cog.png
+            ImageView cogView = new ImageView(cogImg);
+            cogView.setFitWidth(50);
+            cogView.setFitHeight(50);
+            cogView.setPreserveRatio(true);
 
             // Options Button code section
-            Button options = new Button("Options");
-            //HBox button = new HBox(options);
-            //button.setAlignment(Pos.CENTER);
-            //button.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
+            Button options = new Button();
+            options.setStyle("-fx-font-size: 25pt; -fx-background-radius: 20px; -fx-background-color: black; -fx-text-fill: black;");
+            options.setGraphic(cogView);
 
             options.setOnAction((event) -> {
                 int thisTierIndex = index;
@@ -312,7 +320,6 @@ public class TierListUI {
                 newTierListStage.setScene(dialogScene);
                 newTierListStage.show();
             });
-            buttonBoxes.add(new VBox(options));
             VBox vBoxOptionsBtn = new VBox(options);
             // Modifies the option boxes on the right
             vBoxOptionsBtn.setAlignment(Pos.CENTER);
@@ -395,8 +402,14 @@ public class TierListUI {
      */
     private void addBottonTier(Tier selectedTier, TextField newTierTitleField, Label errorMsg, Stage newTierListStage, int index) {
         String title = newTierTitleField.getText();
-        boolean exists = false;
+        if (title.isEmpty()) {
+            errorMsg.setText("The Title Can't Be Empty.");
+            errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
+            newTierTitleField.setText("");
+            return;
+        }
 
+        boolean exists = false;
         //Iterates through Tier and checks if the title already exists.
         for (Tier t : tierList.getTiers()) {
             if (t.getTierTitle().equals(title)){
@@ -415,6 +428,7 @@ public class TierListUI {
             errorMsg.setText("The Title Already Exists.");
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
+            return;
         }
         //TierListMaker.changeScenes(getTierListUI());
         makeTierListUI();
@@ -430,8 +444,14 @@ public class TierListUI {
      */
     private void addTopTier(Tier selectedTier, TextField newTierTitleField, Label errorMsg, Stage newTierStage, int index) {
         String title = newTierTitleField.getText();
-        boolean exists = false;
+        if (title.isEmpty()) {
+            errorMsg.setText("The Title Can't Be Empty.");
+            errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
+            newTierTitleField.setText("");
+            return;
+        }
 
+        boolean exists = false;
         //Iterates through Tier and checks if the title already exists.
         for (Tier t : tierList.getTiers()) {
             if (t.getTierTitle().equals(title)){
@@ -450,6 +470,7 @@ public class TierListUI {
             errorMsg.setText("The Title Already Exists.");
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierTitleField.setText("");
+            return;
         }
         //TierListMaker.changeScenes(getTierListUI());
         makeTierListUI();
