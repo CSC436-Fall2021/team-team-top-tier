@@ -19,7 +19,7 @@ import java.io.Serializable;
 public class Picture implements Serializable, Comparable {
 
     public static final int IMAGE_CROP_SIZE = 75;
-    public PictureSortFlag sortMethod = PictureSortFlag.ByName;
+    public static PictureSortFlag sortMethod = PictureSortFlag.ByDateIn;
 
     public static final DataFormat PICTURE_FORMAT = new DataFormat("Picture Object");
 
@@ -96,8 +96,8 @@ public class Picture implements Serializable, Comparable {
         return view;
     }
 
-    public void setSortMethod(PictureSortFlag option) {
-        this.sortMethod = option;
+    public static void setSortMethod(PictureSortFlag option) {
+        sortMethod = option;
     }
 
     public void setSquareCrop(double x1, double y1) {
@@ -142,12 +142,22 @@ public class Picture implements Serializable, Comparable {
     @Override
     public int compareTo(@NotNull Object o) {
         int retVal = 0;
+        if (sortMethod == null) {
+            retVal = -1 * ((Long)((Picture)o).getUploadTime()).compareTo(timeIn);
+            return retVal;
+        }
         switch (sortMethod) {
-            case ByDate:
+            case ByDateIn:
+                retVal = -1 * ((Long)((Picture)o).getUploadTime()).compareTo(timeIn);
+                break;
+            case ByNameIn:
+                retVal = name.toUpperCase().compareTo(((Picture)o).getName().toUpperCase());
+                break;
+            case ByDateDec:
                 retVal = ((Long)((Picture)o).getUploadTime()).compareTo(timeIn);
                 break;
-            case ByName:
-                retVal = ((Picture)o).getName().compareTo(name);
+            case ByNameDec:
+                retVal = ((Picture)o).getName().toUpperCase().compareTo(name.toUpperCase());
                 break;
         }
         return retVal;
