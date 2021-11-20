@@ -128,7 +128,7 @@ public class TierListUI {
         return scene;
     }
 
-    private void refreshTier(HBox pictureList, Tier current, ImageView addIcon) {
+    private void refreshTier(HBox pictureList, Tier current, HBox addIcon) {
         pictureList.getChildren().clear();
 
         for(Picture pic : current.getPictures()) {
@@ -176,7 +176,7 @@ public class TierListUI {
                 e.printStackTrace();
             }
             Image addImg = new Image(addStream, PICTURE_DRAW_SIZE,PICTURE_DRAW_SIZE, false,true);
-            ImageView addIcon = new ImageView(addImg);
+            HBox addIcon = new HBox(new ImageView(addImg));
             HBox hBoxImageView = new HBox();
             refreshTier(hBoxImageView, tiers.get(index), addIcon);
 
