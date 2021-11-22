@@ -13,6 +13,8 @@ module csc436.tierlistmaker {
     requires org.jetbrains.annotations;
     requires java.desktop;
     requires javafx.swing;
+    requires javafx.graphics;
+
 
     opens csc436.View to javafx.fxml;
     exports csc436.View;
