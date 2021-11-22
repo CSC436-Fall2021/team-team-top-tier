@@ -3,13 +3,21 @@ package csc436.View;
 import csc436.Model.Picture;
 import csc436.Model.Tier;
 import csc436.Model.TierList;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -21,15 +29,18 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.awt.image.RenderedImage;
+import java.io.*;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Program: TierListUI.java
@@ -45,6 +56,8 @@ public class TierListUI {
     public static final int MAX_PICTURE_NUMBER = 6;
     public static final int PICTURE_DRAW_SIZE = 120;
 
+    private static final int COLUMN_WIDTH = 200;
+
     private TierList tierList;
     private float windowWidth;
     private int  windowHeight;
@@ -54,9 +67,7 @@ public class TierListUI {
     private int indexOfSelectedTier;
     private Scene tierListScene;
 
-    private LinkedList<HBox> nameBoxes;
-    private LinkedList<HBox> tierBoxes;
-    private LinkedList<VBox> buttonBoxes;
+    private HashMap<HBox, ImageView> tierBoxes;
     private GridPane tierGrid;
     private GridPane imageGrid;
 
@@ -68,11 +79,11 @@ public class TierListUI {
         windowHeight= 720;
     }
 
-    public Scene  getTierListUI() {
+    public Scene getTierListUI() {
         pane= new BorderPane();
         tierGrid= new GridPane();
         imageGrid = new GridPane();
-
+        tierBoxes = new HashMap<HBox, ImageView> ();
         //ScrollPane added for tiers section
         ScrollPane tierGridScroll = new ScrollPane(tierGrid);
         tierGridScroll.setPrefViewportHeight(500);
@@ -91,14 +102,21 @@ public class TierListUI {
 
         VBox gridBox= new VBox(scrollPane,imageScrollPane);
 
+        //menu to save picture
+        MenuBar menu = new MenuBar();
+        Menu saveMenu = new Menu("Save");
+        saveMenu.getItems().add(makeExportMenu());
+        menu.getMenus().add(saveMenu);
+
         Label title= new Label(tierList.getTierListTitle());
-        HBox titleBox= new HBox(title);
+        VBox titleBox= new VBox();
+        titleBox.getChildren().addAll(menu, title);
 
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
 
         // Position title and grids
-        pane.setMargin(titleBox, new Insets(10,0,40,0));
+        pane.setMargin(titleBox, new Insets(0,0,40,0));
         gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
         gridBox.setMargin(imageScrollPane, new Insets(0,0,40,0));
 
@@ -107,15 +125,16 @@ public class TierListUI {
         imageScrollPane.setAlignment(Pos.BOTTOM_CENTER);
 
         pane.setStyle("-fx-background-color: black");
+        tierGrid.setStyle("-fx-background-color: black");
 
         title.setStyle("-fx-text-fill: white; -fx-font-family: impact");
         title.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
 
         Scene scene = new Scene(pane, windowWidth, windowHeight);
         // TODO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
-        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
+        tierGrid.getColumnConstraints().add(new ColumnConstraints(COLUMN_WIDTH));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(MAX_PICTURE_NUMBER * PICTURE_DRAW_SIZE + 6));
-        tierGrid.getColumnConstraints().add(new ColumnConstraints(200));
+        tierGrid.getColumnConstraints().add(new ColumnConstraints(COLUMN_WIDTH));
 
         getImageUI();
         makeTierListUI();
@@ -160,6 +179,7 @@ public class TierListUI {
             hBoxTierTitle.setStyle("-fx-background-color: rgb("+redLevel+",0,0);" +
                     "-fx-border-color: white;" + "-fx-border-width: 3;");
             redLevel-=40;
+            tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE + 6));
             tierGrid.add(hBoxTierTitle,0, index);
 
             //Gets the "Add" button image path.
@@ -170,7 +190,8 @@ public class TierListUI {
                 e.printStackTrace();
             }
             Image addImg = new Image(addStream, PICTURE_DRAW_SIZE,PICTURE_DRAW_SIZE, false,true);
-            HBox addIcon = new HBox(new ImageView(addImg));
+            ImageView addPicture = new ImageView(addImg);
+            HBox addIcon = new HBox(addPicture);
             HBox hBoxImageView = new HBox();
             refreshTier(hBoxImageView, tiers.get(index), addIcon);
 
@@ -178,6 +199,7 @@ public class TierListUI {
             hBoxImageView.setAlignment(Pos.CENTER_LEFT);
             hBoxImageView.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
             tierGrid.add(hBoxImageView,1, index);
+            tierBoxes.put(hBoxImageView, addPicture);
 
             addIcon.setOnDragOver((newEvent) -> {;
                 if (newEvent.getDragboard().hasImage()){
@@ -328,6 +350,53 @@ public class TierListUI {
         }
 
         imageUploadUI.drawPicturesAsImages(tierGrid);
+    }
+
+    private MenuItem makeExportMenu() {
+        MenuItem exportButt = new MenuItem("Save");
+        EventHandler<ActionEvent> exportEvent = actionEvent -> {
+            // TODO: crop the scene
+            // TODO: save the scene
+            // TODO: open a file browser for user to choose location
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save");
+
+            FileChooser.ExtensionFilter extFilter =
+                    new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            File file = fileChooser.showSaveDialog(new Stage());
+
+            if (file != null) {
+                try {
+
+                    //remove the plus icons
+                    Image plusIcon = null;
+                    for (HBox tierBox : tierBoxes.keySet()) {
+                        if (plusIcon == null) {
+                            plusIcon = tierBoxes.get(tierBox).getImage();
+                        }
+                        tierBoxes.get(tierBox).setImage(null);
+                    }
+
+                    SnapshotParameters params = new SnapshotParameters();
+                    params.setViewport(new Rectangle2D(0, 0, tierGrid.getWidth() - (COLUMN_WIDTH + 6), tierGrid.getHeight() - 6));
+                    WritableImage writableImage = tierGrid.snapshot(params, null);
+                    RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+                    ImageIO.write(renderedImage, "png", file);
+                    System.out.println("Image Saved");
+
+                    //replace the plus icons
+                    for (HBox tierBox : tierBoxes.keySet()) {
+                        tierBoxes.get(tierBox).setImage(plusIcon);
+                    }
+
+                } catch (IOException e) {
+                }
+            }
+        };
+        exportButt.setOnAction(exportEvent);
+        return exportButt;
     }
 
     private void getImageUI() {
