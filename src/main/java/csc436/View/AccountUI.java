@@ -437,6 +437,7 @@ public class AccountUI {
             gridPaneBtns.setHgap(25);
             HBox hBoxBtns = new HBox(gridPaneBtns);
             HBox hBoxTag = new HBox(tagScrollPane, tagTextField);
+            tagTextField.setPromptText("Enter a tag");
             VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxBtns, hBoxTag);
 //                VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxBtns);
 
@@ -617,7 +618,7 @@ public class AccountUI {
         updateTags(tierList, tagText);
     }
     private void updateTags(TierList tierList, Text tagText) {
-        String tagContent = "";
+        String tagContent = "Tags:  ";
         List<String> tagList =  tierList.getTagList();
         for (String tag: tagList) {
             tagContent += "#" + tag + "  ";
