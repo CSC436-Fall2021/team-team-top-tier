@@ -20,7 +20,7 @@ public class TierList implements Serializable {
     private String tierListTitle;
     private List<Tier> tiers;
     private String tierListStyle;
-    private List<String> tagList;
+    private ArrayList<String> tagList;
 
     public TierList(String title) {
         tierListTitle = title;
@@ -108,6 +108,7 @@ public class TierList implements Serializable {
      * @param tag
      */
     public void addTag(String tag) {
+        // TODO: change/deal with special characters
         if (!tagList.contains(tag)) {
             tagList.add(tag);
         }
@@ -118,5 +119,20 @@ public class TierList implements Serializable {
         }
     }
 
-    public List<String> getTagList() { return tagList; }
+    public ArrayList<String> getTagList() {
+        return tagList;
+    }
+    public String getTagListString() {
+        String tagContent = "";
+        for (String tag: tagList) {
+            tagContent += "#" + tag + "  ";
+        }
+        return tagContent;
+    }
+
+    public String formatTag(String tag) {
+        String formattedTag = "";
+        formattedTag = tag.replaceAll("\s", "-");
+        return formattedTag;
+    }
 }
