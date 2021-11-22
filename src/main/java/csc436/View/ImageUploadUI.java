@@ -331,6 +331,7 @@ public class ImageUploadUI extends Application {
                     if (event.getTransferMode() == TransferMode.MOVE) {
                         grid.getChildren().remove(pImageView);
                         list.remove(p);
+                        savePictures(list, fileName);
                         drawPicturesAsImages(grid);
                     }
                     event.consume();

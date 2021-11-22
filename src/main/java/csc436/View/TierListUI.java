@@ -149,6 +149,9 @@ public class TierListUI {
             picture.setOnMouseClicked((event) -> {
                 current.removePicture(pic);
                 refreshTier(pictureList, current, addIcon);
+                imageUploadUI.getList().add(pic);
+                imageUploadUI.drawPicturesAsImages(imageGrid);
+                imageUploadUI.savePictures(imageUploadUI.getList(), imageUploadUI.fileName);
             });
             picture.setFitHeight(PICTURE_DRAW_SIZE);
             picture.setFitWidth(PICTURE_DRAW_SIZE);
