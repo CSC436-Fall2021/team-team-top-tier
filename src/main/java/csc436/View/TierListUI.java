@@ -11,19 +11,10 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
@@ -34,13 +25,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Program: TierListUI.java
@@ -67,7 +55,7 @@ public class TierListUI {
     private int indexOfSelectedTier;
     private Scene tierListScene;
 
-    private HashMap<HBox, ImageView> tierBoxes;
+    private HashMap<FlowPane, ImageView> tierBoxes;
     private GridPane tierGrid;
     private GridPane imageGrid;
 
@@ -83,7 +71,7 @@ public class TierListUI {
         pane= new BorderPane();
         tierGrid= new GridPane();
         imageGrid = new GridPane();
-        tierBoxes = new HashMap<HBox, ImageView> ();
+        tierBoxes = new HashMap<FlowPane, ImageView>();
         //ScrollPane added for tiers section
         ScrollPane tierGridScroll = new ScrollPane(tierGrid);
         tierGridScroll.setPrefViewportHeight(500);
@@ -108,9 +96,36 @@ public class TierListUI {
         saveMenu.getItems().add(makeExportMenu());
         menu.getMenus().add(saveMenu);
 
+        // Add Back Button
+        //Gets the "back" button image path.
+
+        InputStream backStream = null;
+        try {
+            backStream = new FileInputStream("src/main/java/csc436/Images/BackArrow.png");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        //ImageView for the back button (Cog button)
+        Image backImage = new Image(backStream);
+        //Creates ImageViews for BackArrow.png
+        ImageView backView = new ImageView(backImage);
+        backView.setFitWidth(150);
+        backView.setFitHeight(150);
+        backView.setPreserveRatio(true);
+
+        // Options Button code section
+        Button backButton = new Button();
+        backButton.setStyle("-fx-font-size: 25pt; -fx-background-radius: 20px; -fx-background-color: black; -fx-text-fill: black;");
+        backButton.setGraphic(backView);
+
+        backButton.setOnAction((event) -> {
+            System.out.println("GO BACK");
+            });
+
         Label title= new Label(tierList.getTierListTitle());
         VBox titleBox= new VBox();
-        titleBox.getChildren().addAll(menu, title);
+        titleBox.getChildren().addAll(menu, title,backButton);
 
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
@@ -141,7 +156,7 @@ public class TierListUI {
         return scene;
     }
 
-    private void refreshTier(HBox pictureList, Tier current, HBox addIcon) {
+    private void refreshTier(FlowPane pictureList, Tier current, HBox addIcon) {
         pictureList.getChildren().clear();
 
         for(Picture pic : current.getPictures()) {
@@ -157,12 +172,17 @@ public class TierListUI {
             picture.setFitWidth(PICTURE_DRAW_SIZE);
             pictureList.getChildren().add(picture);
         }
-        if(pictureList.getChildren().size() < MAX_PICTURE_NUMBER) {
+
+        pictureList.getChildren().add(addIcon);
+        /**
+        if(pictureList.getChildren().size()%6 == 0) {
             pictureList.getChildren().add(addIcon);
+            makeTierListUI();
         }
+    **/
     }
 
-    // Create and return the Tier List's user interface
+    // Create and return the Tier List's base user interface
     public void  makeTierListUI() {
         tierGrid.getChildren().clear();
         imageGrid.getChildren().clear();
@@ -182,8 +202,7 @@ public class TierListUI {
             hBoxTierTitle.setStyle("-fx-background-color: rgb("+redLevel+",0,0);" +
                     "-fx-border-color: white;" + "-fx-border-width: 3;");
             redLevel-=40;
-            tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE + 6));
-            tierGrid.add(hBoxTierTitle,0, index);
+
 
             //Gets the "Add" button image path.
             InputStream addStream = null;
@@ -192,17 +211,22 @@ public class TierListUI {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+
             Image addImg = new Image(addStream, PICTURE_DRAW_SIZE,PICTURE_DRAW_SIZE, false,true);
             ImageView addPicture = new ImageView(addImg);
             HBox addIcon = new HBox(addPicture);
-            HBox hBoxImageView = new HBox();
-            refreshTier(hBoxImageView, tiers.get(index), addIcon);
+            FlowPane fpImageView = new FlowPane();
+            refreshTier(fpImageView, tiers.get(index), addIcon);
+
+            tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE *2 + 6));
+            //tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE *((fpImageView.getChildren().size()/6)+1) + 6));
+            tierGrid.add(hBoxTierTitle,0, index);
 
             // Modifies the tiers themselves
-            hBoxImageView.setAlignment(Pos.CENTER_LEFT);
-            hBoxImageView.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
-            tierGrid.add(hBoxImageView,1, index);
-            tierBoxes.put(hBoxImageView, addPicture);
+            fpImageView.setAlignment(Pos.CENTER_LEFT);
+            fpImageView.setStyle("-fx-border-color: white;" + "-fx-border-width: 3;");
+            tierGrid.add(fpImageView,1, index);
+            tierBoxes.put(fpImageView, addPicture);
 
             addIcon.setOnDragOver((newEvent) -> {;
                 if (newEvent.getDragboard().hasImage()){
@@ -216,7 +240,7 @@ public class TierListUI {
                 Picture newPic = (Picture) newEvent.getDragboard().getContent(Picture.PICTURE_FORMAT);
                 tiers.get(index).addPicture(newPic);
 
-                refreshTier(hBoxImageView, tiers.get(index), addIcon);
+                refreshTier(fpImageView, tiers.get(index), addIcon);
 
                 newEvent.setDropCompleted(true);
             });
@@ -375,7 +399,7 @@ public class TierListUI {
 
                     //remove the plus icons
                     Image plusIcon = null;
-                    for (HBox tierBox : tierBoxes.keySet()) {
+                    for (FlowPane tierBox : tierBoxes.keySet()) {
                         if (plusIcon == null) {
                             plusIcon = tierBoxes.get(tierBox).getImage();
                         }
@@ -390,7 +414,7 @@ public class TierListUI {
                     System.out.println("Image Saved");
 
                     //replace the plus icons
-                    for (HBox tierBox : tierBoxes.keySet()) {
+                    for (FlowPane tierBox : tierBoxes.keySet()) {
                         tierBoxes.get(tierBox).setImage(plusIcon);
                     }
 
@@ -544,41 +568,6 @@ public class TierListUI {
             newTierTitleField.setText("");
             return;
         }
-        //TierListMaker.changeScenes(getTierListUI());
         makeTierListUI();
-    }
-
-    /**
-     * depreciated?
-     * @param i
-     * @param j
-     */
-    private void addMonkey(int i, int j) {
-        //Gets the "Chimp" image path.
-        InputStream chimpStream = null;
-        try {
-            chimpStream = new FileInputStream("src/main/java/csc436/Images/Chimp.jpg");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        Image chimpImg = new Image(chimpStream, PICTURE_DRAW_SIZE,PICTURE_DRAW_SIZE, false,true);
-        ImageView view= new ImageView(chimpImg);
-        imageGrid.add(view,j,i);
-
-        view.setOnDragDetected((event) -> {
-            Dragboard dBoard= view.startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent clipCont= new ClipboardContent();
-            clipCont.putImage(view.getImage());
-            dBoard.setContent(clipCont);
-
-            event.consume();
-        });
-
-        view.setOnDragDone((event) -> {
-            if (event.getTransferMode() == TransferMode.MOVE) {
-                imageGrid.getChildren().remove(view);
-            }
-            event.consume();
-        });
     }
 }
