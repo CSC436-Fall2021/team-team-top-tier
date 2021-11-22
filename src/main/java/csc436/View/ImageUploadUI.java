@@ -286,11 +286,6 @@ public class ImageUploadUI extends Application {
     public void drawPicturesAsImages(GridPane tierGrid) {
         grid.getChildren().clear();
 
-        // set the Export Button
-        ExportUI exportButtUI = new ExportUI(tierGrid);
-        Button exportButt = exportButtUI.getExportButton();
-        grid.add(new HBox(exportButt),8,0);
-
         //Set the Sort Button
         ComboBox sortBtn = new ComboBox();
         sortBtn.getItems().addAll("Date ↑", "Date ↓", "Name ↑", "Name ↓");
