@@ -113,7 +113,7 @@ public class ImageUploadUI extends Application {
      */
     public void createImportButt() {
         importButt =  new Button("Import Images");
-//        importButt.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
+        importButt.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
         EventHandler<ActionEvent> importEvent = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -288,6 +288,8 @@ public class ImageUploadUI extends Application {
 
         //Set the Sort Button
         ComboBox sortBtn = new ComboBox();
+        sortBtn.setPromptText("Sort by");
+        sortBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
         sortBtn.getItems().addAll("Date ↑", "Date ↓", "Name ↑", "Name ↓");
         grid.add(new HBox(sortBtn), 9, 0);
 
@@ -331,6 +333,7 @@ public class ImageUploadUI extends Application {
                     if (event.getTransferMode() == TransferMode.MOVE) {
                         grid.getChildren().remove(pImageView);
                         list.remove(p);
+                        savePictures(list, fileName);
                         drawPicturesAsImages(grid);
                     }
                     event.consume();
