@@ -22,9 +22,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -452,6 +450,13 @@ public class AccountUI {
      */
     private void deleteTierList(TierList tierList, Stage newTierListStage){
         account.getTierLists().remove(tierList);
+
+        //Deletes the serializable list of images for that TierList.
+        File tier = null;
+        tier = new File(tierList.getTierListTitle() + ".ser");
+        if (tier != null){
+            tier.delete();
+        }
         newTierListStage.close();
         showTierLists();
     }
@@ -478,6 +483,12 @@ public class AccountUI {
 
             //If the title does not already exist, update the title of the TierList.
             if (!exists){
+
+                File tier = null;
+                tier = new File(tierList.getTierListTitle() + ".ser");
+                if (tier != null){
+                    tier.renameTo(new File(newTitle + ".ser"));
+                }
                 tierList.setTierListTitle(newTitle);
                 newTierListStage.close();
                 showTierLists();
@@ -487,7 +498,7 @@ public class AccountUI {
                 newTierListTitleField.setText("");
             }
         }
-        else{//If Title exists, display error message.
+        else{//If Title is empty, display error message.
             errorMsg.setText("The Title Can't Be Empty.");
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             newTierListTitleField.setText("");
