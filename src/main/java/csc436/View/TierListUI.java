@@ -23,6 +23,11 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.paint.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
@@ -55,6 +60,9 @@ public class TierListUI {
     private int indexOfSelectedTier;
     private Scene tierListScene;
 
+    Color tierLevelStd;
+    Color tierLevelCurrent;
+
     private HashMap<FlowPane, ImageView> tierBoxes;
     private GridPane tierGrid;
     private GridPane imageGrid;
@@ -68,6 +76,9 @@ public class TierListUI {
     }
 
     public Scene getTierListUI() {
+
+        tierLevelStd = Color.RED;
+
         pane= new BorderPane();
         tierGrid= new GridPane();
         imageGrid = new GridPane();
@@ -95,6 +106,9 @@ public class TierListUI {
         Menu saveMenu = new Menu("Save");
         saveMenu.getItems().add(makeExportMenu());
         menu.getMenus().add(saveMenu);
+        Menu styleMenu = new Menu("Style");
+        styleMenu.getItems().add(makeColorMenu());
+        menu.getMenus().add(styleMenu);
 
         // Add Back Button
         //Gets the "back" button image path.
@@ -134,6 +148,7 @@ public class TierListUI {
         pane.setMargin(titleBox, new Insets(0,0,40,0));
         gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
         gridBox.setMargin(imageScrollPane, new Insets(0,0,40,0));
+        imageGrid.setPadding(new Insets(0, 10, 0, 10));
 
         titleBox.setAlignment(Pos.TOP_CENTER);
         scrollPane.setAlignment(Pos.TOP_CENTER);
@@ -149,7 +164,7 @@ public class TierListUI {
         // TODO: CHANGE CONSTRAINTS TO USER'S MONITOR DIMENSIONS
         tierGrid.getColumnConstraints().add(new ColumnConstraints(COLUMN_WIDTH));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(MAX_PICTURE_NUMBER * PICTURE_DRAW_SIZE + 6));
-        tierGrid.getColumnConstraints().add(new ColumnConstraints(COLUMN_WIDTH));
+        tierGrid.getColumnConstraints().add(new ColumnConstraints(COLUMN_WIDTH + 8));
 
         getImageUI();
         makeTierListUI();
@@ -185,11 +200,12 @@ public class TierListUI {
     // Create and return the Tier List's base user interface
     public void  makeTierListUI() {
         tierGrid.getChildren().clear();
+        tierGrid.getRowConstraints().clear();
         imageGrid.getChildren().clear();
         List<Tier> tiers= tierList.getTiers();
-        int redLevel= 255;
 
         // The loop adds nodes to the tier list GridPane and stylizes them as well
+        tierLevelCurrent =tierLevelStd;
         for (int i=0;i<tiers.size();i++) {
             int index = i;
             Label tierTitleLabel = new Label(tiers.get(index).getTierTitle());
@@ -197,11 +213,14 @@ public class TierListUI {
 
             // Modifies tier name boxes
             hBoxTierTitle.setAlignment(Pos.CENTER);
+            String r = Integer.toString((int) (tierLevelCurrent.getRed() * 255));
+            String g = Integer.toString((int) (tierLevelCurrent.getGreen() * 255));
+            String b = Integer.toString((int) (tierLevelCurrent.getBlue() * 255));
             tierTitleLabel.setStyle(
                     "-fx-text-fill: white;"+"-fx-font-size: 50px;"+"-fx-font-weight: bold;");
-            hBoxTierTitle.setStyle("-fx-background-color: rgb("+redLevel+",0,0);" +
+            hBoxTierTitle.setStyle("-fx-background-color: rgb("+r+","+g+","+b+");" +
                     "-fx-border-color: white;" + "-fx-border-width: 3;");
-            redLevel-=40;
+            tierLevelCurrent = tierLevelCurrent.darker();
 
 
             //Gets the "Add" button image path.
@@ -215,6 +234,7 @@ public class TierListUI {
             Image addImg = new Image(addStream, PICTURE_DRAW_SIZE,PICTURE_DRAW_SIZE, false,true);
             ImageView addPicture = new ImageView(addImg);
             HBox addIcon = new HBox(addPicture);
+            addIcon.setOpacity(0.6);
             FlowPane fpImageView = new FlowPane();
             refreshTier(fpImageView, tiers.get(index), addIcon);
 
@@ -377,6 +397,60 @@ public class TierListUI {
         }
 
         imageUploadUI.drawPicturesAsImages(tierGrid);
+    }
+
+    private MenuItem makeColorMenu() {
+        MenuItem item = new MenuItem("Tier Colors");
+        EventHandler<ActionEvent> colorEvent = actionEvent -> {
+            final Stage colorStage = new Stage();
+            BorderPane colorPane = new BorderPane();
+
+            Label backgroundLabel = new Label("Background color");
+            Background b = tierGrid.getBackground();
+            Paint p = b.getFills().get(0).getFill();
+            ColorPicker backgroundCp = new ColorPicker((Color) p);
+            HBox bgPicker = new HBox(backgroundLabel, backgroundCp);
+            bgPicker.setPadding(new Insets(10, 10, 10, 10));
+            bgPicker.setSpacing(10);
+
+            Label tierLabel = new Label("Tier color");
+            ColorPicker tierCp = new ColorPicker(tierLevelStd);
+            HBox tierPicker = new HBox(tierLabel, tierCp);
+            tierPicker.setPadding(new Insets(10, 10, 10, 10));
+            tierPicker.setSpacing(10);
+
+            VBox pickers = new VBox(bgPicker, tierPicker);
+            pickers.setAlignment(Pos.CENTER);
+            colorPane.setCenter(pickers);
+
+            Button save = new Button("Save");
+            save.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    tierLevelStd = tierCp.getValue();
+                    makeTierListUI();
+                    tierGrid.setBackground(new Background(new BackgroundFill(backgroundCp.getValue(), null, null)));
+                    colorStage.close();
+                }
+            });
+
+            Button cancel = new Button("Cancel");
+            cancel.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    colorStage.close();
+                }
+            });
+
+            HBox buttons = new HBox(save, cancel);
+            colorPane.setBottom(buttons);
+
+            Scene dialogScene = new Scene(colorPane, 300, 300);
+            colorStage.setScene(dialogScene);
+            colorStage.show();
+        };
+        item.setOnAction(colorEvent);
+        return item;
     }
 
     private MenuItem makeExportMenu() {
