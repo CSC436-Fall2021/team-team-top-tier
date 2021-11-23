@@ -419,6 +419,7 @@ public class AccountUI {
             updateTags(clickedTierList, tagText);
             ScrollPane tagScrollPane = new ScrollPane(tagText);
             TextField tagTextField = new TextField();
+            tagTextField.setPromptText("Add a tag");
 
             //Sets the style of the labels and button.
             newTierListText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 24));
@@ -618,7 +619,7 @@ public class AccountUI {
         updateTags(tierList, tagText);
     }
     private void updateTags(TierList tierList, Text tagText) {
-        String tagContent = "Tags:  ";
+        String tagContent = "Tags: ";
         List<String> tagList =  tierList.getTagList();
         for (String tag: tagList) {
             tagContent += "#" + tag + "  ";
