@@ -6,10 +6,7 @@ import csc436.Model.TierList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -392,118 +389,160 @@ public class AccountUI {
     }
 
     /**
+     * Shows a popup window that handles the renaming of a tier list
+     */
+    private void showRenameTierUI() {
+        final Stage newTierListStage = new Stage();
+        BorderPane newTierListPane = new BorderPane();
+        newTierListStage.setTitle("Rename " + nameOfTierList);
+        newTierListStage.initModality(Modality.APPLICATION_MODAL);
+
+        //Creates the Nodes necessary for a new TierList (Text fields and button).
+        Label errorMsg = new Label();
+        Label newTierListTitle = new Label("Update Title:");
+        TextField newTierListTitleField = new TextField();
+        Button updateBtn = new Button ("Update");
+
+        //Sets the style of the labels and button.
+        errorMsg.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
+        updateBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+
+        //Creates a VBox with all the Nodes.
+        HBox hBoxName = new HBox(newTierListTitle, newTierListTitleField);
+        hBoxName.setSpacing(10);
+        VBox vBoxNewTierList = new VBox(errorMsg, hBoxName, updateBtn);
+
+        //Position of Nodes.
+        errorMsg.setAlignment(Pos.CENTER);
+        hBoxName.setAlignment(Pos.CENTER);
+        updateBtn.setAlignment(Pos.CENTER);
+        vBoxNewTierList.setMargin(errorMsg, new Insets(5, 0, 0, 0));
+        vBoxNewTierList.setMargin(hBoxName, new Insets(10, 0, 10, 0));
+        vBoxNewTierList.setMargin(updateBtn, new Insets(10, 0, 10, 0));
+
+        //Size of textFields.
+        newTierListTitleField.setPrefWidth(100);
+
+        //Puts the VBox into a GridPane
+        newTierListPane.setCenter(vBoxNewTierList);
+        vBoxNewTierList.setAlignment(Pos.TOP_CENTER);
+
+        //Event handlers to update the selected TierList.
+        updateBtn.setOnAction((event1) -> {
+            updateTierList(clickedTierList, newTierListTitleField, errorMsg, newTierListStage);
+        });
+
+        Scene dialogScene = new Scene(newTierListPane, 200, 125);
+        newTierListStage.setScene(dialogScene);
+        newTierListStage.show();
+    }
+
+    /**
+     * shows a popup that allows users to add and delete any tags that they would like
+     */
+    private void showManageTagsUI() {
+        final Stage newTierListStage = new Stage();
+        BorderPane newTierListPane = new BorderPane();
+        newTierListStage.setTitle("Selected TierList");
+        newTierListStage.initModality(Modality.APPLICATION_MODAL);
+
+        //Creates the Nodes necessary for a new TierList (Text fields and button).
+        Label tagTextLabel = new Label("Add a tag:");
+        TextField tagTextField = new TextField();
+        Text tagText = new Text();
+        updateTags(clickedTierList, tagText);
+        Label tagCurrLabel = new Label("");
+        if(tagText.getText().length() > 0) {
+            tagCurrLabel.setText("Tags");
+        }
+        ScrollPane tagScrollPane = new ScrollPane(tagText);
+
+        //Sets the style of the labels and button.
+        tagScrollPane.setStyle("-fx-font-size: 10pt; -fx-background-color:transparent;");
+        tagScrollPane.setPrefViewportWidth(200);
+
+        //Creates a VBox with all the Nodes.
+        HBox hBoxTag = new HBox(tagTextLabel, tagTextField);
+        hBoxTag.setSpacing(10);
+        tagTextField.setPromptText("Enter a tag");
+        VBox vBoxNewTierList = new VBox(hBoxTag, tagCurrLabel, tagScrollPane);
+
+        //Position of Nodes.
+        vBoxNewTierList.setMargin(hBoxTag, new Insets(10, 10, 10, 10));
+
+        //Size of textFields.
+        tagTextField.setPrefWidth(75);
+
+        //Puts the VBox into a GridPane
+        newTierListPane.setCenter(vBoxNewTierList);
+        vBoxNewTierList.setAlignment(Pos.TOP_CENTER);
+        newTierListPane.setMargin(vBoxNewTierList, new Insets(10, 10, 10, 10));
+
+        //Event handlers to add tags to the selected TierList.
+        tagTextField.setOnKeyPressed((event3) -> {
+            if (event3.getCode() == KeyCode.ENTER) {
+                if(tagTextField.getText() == "") {
+                    return;
+                }
+                addTierListTag(clickedTierList, clickedTierList.formatTag(tagTextField.getText()), tagText);
+                if(tagText.getText().length() > 0) {
+                    tagCurrLabel.setText("Tags");
+                }
+                tagTextField.setText("");
+            }
+        });
+
+        Scene dialogScene = new Scene(newTierListPane, 200, 200);
+        newTierListStage.setScene(dialogScene);
+        newTierListStage.show();
+    }
+
+    //ToDo: context menu on the image
+    //ToDo: tooltip to show the tags
+    //ToDO: context menu option to manage tags
+    private ContextMenu doTierListContextMenu() {
+
+        ContextMenu menu = new ContextMenu();
+        MenuItem updateContext = new MenuItem("Rename");
+        updateContext.setOnAction((event1) -> {
+            showRenameTierUI();
+        });
+        MenuItem deleteContext = new MenuItem("Delete");
+        deleteContext.setOnAction((newEvent) -> {
+            //removes the list and re-shows the UI
+            deleteTierList(clickedTierList);
+        });
+        MenuItem tagContext = new MenuItem("Manage Tags");
+        tagContext.setOnAction((newEvent) -> {
+            showManageTagsUI();
+        });
+        menu.getItems().addAll(updateContext, deleteContext, tagContext);
+
+        return menu;
+    }
+
+    /**
      * Set the event handler for the delete button, update button, open button, and tag textfield
      *
      * @param button - a TierList button
      * @param index - the index connected to the TierList button
      */
     private void setButtonsEventHandler(Button button, int index) {
+
+        ContextMenu menu = doTierListContextMenu();
+        button.setOnContextMenuRequested(event -> {
+            clickedTierList = account.getTierLists().get(index);
+            nameOfTierList = clickedTierList.getTierListTitle();
+            menu.setY(event.getScreenY());
+            menu.setX(event.getScreenX());
+            menu.show(button.getScene().getWindow());
+        });
+
+        //ToDo: button set on action is always open
         button.setOnAction((event) -> {
             clickedTierList = account.getTierLists().get(index);
             nameOfTierList = clickedTierList.getTierListTitle();
-            final Stage newTierListStage = new Stage();
-            BorderPane newTierListPane = new BorderPane();
-            newTierListStage.setTitle("Selected TierList");
-            newTierListStage.initModality(Modality.APPLICATION_MODAL);
-
-            //Creates the Nodes necessary for a new TierList (Text fields and button).
-            GridPane newTierList = new GridPane();
-            Label newTierListText = new Label(nameOfTierList + " TierList");
-            Label errorMsg = new Label();
-            Label newTierListTitle = new Label("Update Title:");
-            TextField newTierListTitleField = new TextField();
-            Button openBtn = new Button("Open");
-            Button deleteBtn = new Button("Delete");
-            Button updateBtn = new Button ("Update");
-            Text tagText = new Text();
-            updateTags(clickedTierList, tagText);
-            ScrollPane tagScrollPane = new ScrollPane(tagText);
-            TextField tagTextField = new TextField();
-            tagTextField.setPromptText("Add a tag");
-
-            //Sets the style of the labels and button.
-            newTierListText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 24));
-            errorMsg.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
-            openBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
-            deleteBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
-            updateBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
-            tagScrollPane.setStyle("-fx-font-size: 10pt; -fx-background-color:transparent;");
-            tagScrollPane.setPrefViewportWidth(200);
-
-            //Creates a VBox with all the Nodes.
-            HBox hBoxTierListText = new HBox(newTierListText);
-            HBox hBoxErrorMsg = new HBox(errorMsg);
-            HBox hBoxTierList = new HBox(newTierList);
-            GridPane gridPaneBtns = new GridPane();
-            gridPaneBtns.setHgap(25);
-            HBox hBoxBtns = new HBox(gridPaneBtns);
-            HBox hBoxTag = new HBox(tagScrollPane, tagTextField);
-            tagTextField.setPromptText("Enter a tag");
-            VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxBtns, hBoxTag);
-//                VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxBtns);
-
-            //Position of Nodes.
-            hBoxTierListText.setAlignment(Pos.CENTER);
-            hBoxErrorMsg.setAlignment(Pos.CENTER);
-            hBoxTierList.setAlignment(Pos.CENTER);
-            hBoxBtns.setAlignment(Pos.CENTER);
-            vBoxNewTierList.setMargin(hBoxErrorMsg, new Insets(5, 0, 0, 0));
-            vBoxNewTierList.setMargin(hBoxTierList, new Insets(10, 0, 10, 0));
-            vBoxNewTierList.setMargin(hBoxBtns, new Insets(10, 0, 10, 0));
-            vBoxNewTierList.setMargin(hBoxTag, new Insets(10, 0, 10, 0));
-
-            //Set the margins for tags
-            hBoxTag.setMargin(tagTextField, new Insets(10, 10, 10, 10));
-            hBoxTag.setMargin(tagScrollPane, new Insets(15, 10, 10, 10));
-
-            //Size of textFields.
-            newTierListTitleField.setPrefWidth(100);
-            tagTextField.setPrefWidth(100);
-            //Adding H and V gaps to components.
-            newTierList.setHgap(10);
-            newTierList.setVgap(10);
-
-            //Adds all the Labels and Fields for a new TierList to the grid.
-            newTierList.add(newTierListTitle, 0, 0);
-            newTierList.add(newTierListTitleField, 1, 0);
-
-            gridPaneBtns.add(deleteBtn, 0, 0);
-            gridPaneBtns.add(updateBtn, 1, 0);
-            gridPaneBtns.add(openBtn, 2, 0);
-
-            //Puts the VBox into a GridPane
-            newTierListPane.setCenter(vBoxNewTierList);
-            vBoxNewTierList.setAlignment(Pos.TOP_CENTER);
-            newTierListPane.setMargin(vBoxNewTierList, new Insets(25, 0, 0, 0));
-
-            //Event handlers to delete the selected TierList.
-            deleteBtn.setOnAction((newEvent) -> {
-                //Creates and opens the new TierList.
-                deleteTierList(clickedTierList, newTierListStage);
-            });
-
-            //Event handlers to update the selected TierList.
-            updateBtn.setOnAction((event1) -> {
-                updateTierList(clickedTierList, newTierListTitleField, errorMsg, newTierListStage);
-            });
-
-            //Event handlers to open the selected TierList.
-            openBtn.setOnAction((event2) -> {
-                openTierList(clickedTierList, newTierListStage);
-            });
-
-            //Event handlers to add tags to the selected TierList.
-            tagTextField.setOnKeyPressed((event3) -> {
-                if (event3.getCode() == KeyCode.ENTER) {
-                    addTierListTag(clickedTierList, clickedTierList.formatTag(tagTextField.getText()), tagText);
-                    tagTextField.setText("");
-                }
-            });
-
-            Scene dialogScene = new Scene(newTierListPane, 300, 300);
-            newTierListStage.setScene(dialogScene);
-            newTierListStage.show();
-
+            openTierList(clickedTierList);
         });
     }
 
@@ -543,9 +582,8 @@ public class AccountUI {
     /**
      * Purpose: Deletes the specified TierList from the user's account.
      * @param tierList The TierList to be deleted.
-     * @param newTierListStage The Stage which contained the Delete button.
      */
-    private void deleteTierList(TierList tierList, Stage newTierListStage){
+    private void deleteTierList(TierList tierList){
         account.getTierLists().remove(tierList);
 
         //Deletes the serializable list of images for that TierList.
@@ -554,7 +592,7 @@ public class AccountUI {
         if (tier != null){
             tier.delete();
         }
-        newTierListStage.close();
+        //newTierListStage.close();
         showTierLists();
     }
 
@@ -605,12 +643,10 @@ public class AccountUI {
     /**
      * Purpose: Opens the TierListUI of the specified TierList.
      * @param tierList The TierList clicked on the user's Account.
-     * @param newTierListStage The Stage which contained the Open button.
      */
-    private void openTierList(TierList tierList, Stage newTierListStage) {
+    private void openTierList(TierList tierList) {
         //Creates a new TierListUI and displayed the TierList.
         TierListUI tierListUI = new TierListUI(tierList);
-        newTierListStage.close();
         TierListMaker.changeScenes(tierListUI.getTierListUI());
     }
 
@@ -619,10 +655,13 @@ public class AccountUI {
         updateTags(tierList, tagText);
     }
     private void updateTags(TierList tierList, Text tagText) {
-        String tagContent = "Tags: ";
+        String tagContent = "";
         List<String> tagList =  tierList.getTagList();
         for (String tag: tagList) {
-            tagContent += "#" + tag + "  ";
+            tagContent += "#" + tag + "\n";
+        }
+        if(tagContent.length() - 2 > 0) {
+            tagContent.substring(0, tagContent.length() - 2);
         }
         tagText.setText(tagContent);
     }
