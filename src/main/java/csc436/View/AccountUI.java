@@ -529,6 +529,7 @@ public class AccountUI {
      */
     private void setButtonsEventHandler(Button button, int index) {
 
+        //context menu
         ContextMenu menu = doTierListContextMenu();
         button.setOnContextMenuRequested(event -> {
             clickedTierList = account.getTierLists().get(index);
@@ -538,7 +539,23 @@ public class AccountUI {
             menu.show(button.getScene().getWindow());
         });
 
-        //ToDo: button set on action is always open
+        //tag tooltip
+        Tooltip tip = new Tooltip();
+        Tooltip.install(button, tip);
+        tip.setHideDelay(null);
+        button.setOnMouseEntered( ev -> {
+            Text newText = new Text();
+            updateTags(clickedTierList, newText);
+            tip.setText(newText.getText());
+        });
+        button.setOnMouseMoved( ev -> {
+            tip.show(button, ev.getScreenX() + ImageUploadUI.TOOLTIP_XOFFSET, ev.getScreenY() + ImageUploadUI.TOOLTIP_YOFFSET);
+        });
+        button.setOnMouseExited( ev -> {
+            tip.hide();
+        });
+
+        //button press
         button.setOnAction((event) -> {
             clickedTierList = account.getTierLists().get(index);
             nameOfTierList = clickedTierList.getTierListTitle();
