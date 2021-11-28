@@ -60,7 +60,6 @@ public class TierListUI {
     private int indexOfSelectedTier;
     private Scene tierListScene;
 
-    Color tierLevelStd;
     Color tierLevelCurrent;
 
     private HashMap<FlowPane, ImageView> tierBoxes;
@@ -76,8 +75,6 @@ public class TierListUI {
     }
 
     public Scene getTierListUI() {
-
-        tierLevelStd = Color.RED;
 
         pane= new BorderPane();
         tierGrid= new GridPane();
@@ -155,7 +152,7 @@ public class TierListUI {
         imageScrollPane.setAlignment(Pos.BOTTOM_CENTER);
 
         pane.setStyle("-fx-background-color: black");
-        tierGrid.setStyle("-fx-background-color: black");
+        tierGrid.setBackground(new Background(new BackgroundFill(tierList.getBackgroundColor(), null, null)));
 
         title.setStyle("-fx-text-fill: white; -fx-font-family: impact");
         title.setFont(Font.font("Regular", FontWeight.BOLD, FontPosture.REGULAR, 70));
@@ -189,12 +186,6 @@ public class TierListUI {
         }
 
         pictureList.getChildren().add(addIcon);
-        /**
-        if(pictureList.getChildren().size()%6 == 0) {
-            pictureList.getChildren().add(addIcon);
-            makeTierListUI();
-        }
-    **/
     }
 
     // Create and return the Tier List's base user interface
@@ -205,7 +196,7 @@ public class TierListUI {
         List<Tier> tiers= tierList.getTiers();
 
         // The loop adds nodes to the tier list GridPane and stylizes them as well
-        tierLevelCurrent =tierLevelStd;
+        tierLevelCurrent = tierList.getTierRowColor();
         for (int i=0;i<tiers.size();i++) {
             int index = i;
             Label tierTitleLabel = new Label(tiers.get(index).getTierTitle());
@@ -259,9 +250,7 @@ public class TierListUI {
             addIcon.setOnDragDropped((newEvent)  -> {
                 Picture newPic = (Picture) newEvent.getDragboard().getContent(Picture.PICTURE_FORMAT);
                 tiers.get(index).addPicture(newPic);
-
                 refreshTier(fpImageView, tiers.get(index), addIcon);
-
                 newEvent.setDropCompleted(true);
             });
 
@@ -406,15 +395,13 @@ public class TierListUI {
             BorderPane colorPane = new BorderPane();
 
             Label backgroundLabel = new Label("Background color");
-            Background b = tierGrid.getBackground();
-            Paint p = b.getFills().get(0).getFill();
-            ColorPicker backgroundCp = new ColorPicker((Color) p);
+            ColorPicker backgroundCp = new ColorPicker(tierList.getBackgroundColor());
             HBox bgPicker = new HBox(backgroundLabel, backgroundCp);
             bgPicker.setPadding(new Insets(10, 10, 10, 10));
             bgPicker.setSpacing(10);
 
             Label tierLabel = new Label("Tier color");
-            ColorPicker tierCp = new ColorPicker(tierLevelStd);
+            ColorPicker tierCp = new ColorPicker(tierList.getTierRowColor());
             HBox tierPicker = new HBox(tierLabel, tierCp);
             tierPicker.setPadding(new Insets(10, 10, 10, 10));
             tierPicker.setSpacing(10);
@@ -427,9 +414,10 @@ public class TierListUI {
             save.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    tierLevelStd = tierCp.getValue();
+                    tierList.setTierRowColor(tierCp.getValue());
                     makeTierListUI();
-                    tierGrid.setBackground(new Background(new BackgroundFill(backgroundCp.getValue(), null, null)));
+                    tierList.setBackgroundColor(backgroundCp.getValue());
+                    tierGrid.setBackground(new Background(new BackgroundFill(tierList.getBackgroundColor(), null, null)));
                     colorStage.close();
                 }
             });
