@@ -1,5 +1,7 @@
 package csc436.Model;
 
+import javafx.scene.paint.Color;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -21,6 +23,8 @@ public class TierList implements Serializable {
     private List<Tier> tiers;
     private String tierListStyle;
     private ArrayList<String> tagList;
+    private SerializableColor backgroundColor;
+    private SerializableColor tierRowColor;
 
     public TierList(String title) {
         tierListTitle = title;
@@ -31,6 +35,38 @@ public class TierList implements Serializable {
         tiers.add(new Tier("B", 2));
         tiers.add(new Tier("C", 3));
         tagList = new ArrayList<String>();
+        backgroundColor = new SerializableColor(Color.BLACK);
+        tierRowColor = new SerializableColor(Color.RED);
+    }
+
+    /**
+     * Sets the tierLists's saved background color to the given color
+     * @param c - color to save
+     */
+    public void setBackgroundColor(Color c) {
+        backgroundColor = new SerializableColor(c);
+    }
+
+    /**
+     * @return the background color that was saved in this tier list
+     */
+    public Color getBackgroundColor() {
+        return backgroundColor.getFXColor();
+    }
+
+    /**
+     * Sets the tier Rows's saved color to the given color
+     * @param c - color to save
+     */
+    public void setTierRowColor(Color c) {
+        tierRowColor = new SerializableColor(c);
+    }
+
+    /**
+     * @return the tier row color that was saved in this tier list
+     */
+    public Color getTierRowColor() {
+        return tierRowColor.getFXColor();
     }
 
     /**
