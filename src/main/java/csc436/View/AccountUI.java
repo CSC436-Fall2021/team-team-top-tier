@@ -497,9 +497,6 @@ public class AccountUI {
         newTierListStage.show();
     }
 
-    //ToDo: context menu on the image
-    //ToDo: tooltip to show the tags
-    //ToDO: context menu option to manage tags
     private ContextMenu doTierListContextMenu() {
 
         ContextMenu menu = new ContextMenu();
@@ -544,12 +541,16 @@ public class AccountUI {
         Tooltip.install(button, tip);
         tip.setHideDelay(null);
         button.setOnMouseEntered( ev -> {
+            clickedTierList = account.getTierLists().get(index);
+            nameOfTierList = clickedTierList.getTierListTitle();
             Text newText = new Text();
             updateTags(clickedTierList, newText);
             tip.setText(newText.getText());
         });
         button.setOnMouseMoved( ev -> {
-            tip.show(button, ev.getScreenX() + ImageUploadUI.TOOLTIP_XOFFSET, ev.getScreenY() + ImageUploadUI.TOOLTIP_YOFFSET);
+            if(tip.getText().length() > 0) {
+                tip.show(button, ev.getScreenX() + ImageUploadUI.TOOLTIP_XOFFSET, ev.getScreenY() + ImageUploadUI.TOOLTIP_YOFFSET);
+            }
         });
         button.setOnMouseExited( ev -> {
             tip.hide();
