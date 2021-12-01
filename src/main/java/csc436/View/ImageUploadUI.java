@@ -3,11 +3,8 @@ package csc436.View;
 import csc436.Model.Picture;
 import csc436.Model.PictureSortFlag;
 import csc436.Model.TierList;
-import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -15,8 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -24,18 +19,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.*;
-import javafx.util.Duration;
-import org.kordamp.bootstrapfx.scene.layout.Panel;
 
-import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
-public class ImageUploadUI extends Application {
+public class ImageUploadUI implements Serializable {
 
-    public static final String TEST_FILE = "fileName.ser";
     public static final int TOOLTIP_XOFFSET = 10;
     public static final int TOOLTIP_YOFFSET = 7;
 
@@ -43,51 +34,14 @@ public class ImageUploadUI extends Application {
     public static double cropOriginY;
     public String fileName;
 
-    private Stage stage;
-    private ArrayList<Picture> list = new ArrayList<>();
-    private double dragStartX, dragStartY;
-
-    BorderPane pane;
+    private ArrayList<Picture> list;
     GridPane grid;
 
     private Button importButt;
 
     TierList tierList;
     GridPane tierGrid;
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    @Override
-    public void start(Stage stageIn) throws Exception {
-        stage = stageIn;
-        stage.setTitle("Image upload");
-
-        pane = new BorderPane();
-        pane.setStyle("-fx-background-color: crimson");
-        grid = new GridPane();
-        grid.setHgap(3);
-        grid.setVgap(3);
-        grid.setPadding(new Insets(15, 15, 15, 15));
-
-        list = loadPictures(TEST_FILE);
-        drawPicturesAsImages(grid);
-
-        createImportButt();
-
-        // draw the importButt onto the scene
-        BorderPane secondPane = new BorderPane();
-        secondPane.setPadding(new Insets(10, 5, 5, 5));
-        secondPane.setCenter(importButt);
-        pane.setTop(secondPane);
-
-        //Show stage and set scene
-        Scene scene = new Scene(pane, 500, 500);
-
-        stage.setScene(scene);
-        stage.show();
-    }
+    Stage stage;
 
     /**
      * Constructor used in TierListUI to create the image upload button
@@ -96,16 +50,16 @@ public class ImageUploadUI extends Application {
      * @param tierGrid
      * @param imageGrid
      */
-    public ImageUploadUI(TierList tierList, GridPane tierGrid, GridPane imageGrid) {
+    public ImageUploadUI(TierList tierList, GridPane tierGrid, GridPane imageGrid, ArrayList<Picture> list, Stage stage) {
         this.tierList = tierList;
         this.tierGrid = tierGrid;
+        this.stage = stage;
+        this.list = list;
 
         fileName = this.tierList.getTierListTitle() + ".ser";
         grid = imageGrid;
         createImportButt();
-        list = loadPictures(fileName);
-//        drawPictures(imageGrid);
-        drawPicturesAsImages(this.tierGrid);
+        drawPicturesAsImages();
     }
 
     /**
@@ -185,8 +139,8 @@ public class ImageUploadUI extends Application {
                     list.add(pic);
                 }
 
-                drawPicturesAsImages(grid);
-                savePictures(list, fileName);
+                drawPicturesAsImages();
+//                savePictures(list, fileName);
                 imageCropUI.close();
             }
         };
@@ -283,7 +237,7 @@ public class ImageUploadUI extends Application {
         imageCropUI.show();
     }
 
-    public void drawPicturesAsImages(GridPane tierGrid) {
+    public void drawPicturesAsImages() {
         grid.getChildren().clear();
 
         //Set the Sort Button
@@ -308,7 +262,7 @@ public class ImageUploadUI extends Application {
                 Picture.setSortMethod(PictureSortFlag.ByDateDec);
             }
             Collections.sort(list);
-            drawPicturesAsImages(grid);
+            drawPicturesAsImages();
         });
 
         // set the Import Images button
@@ -333,8 +287,8 @@ public class ImageUploadUI extends Application {
                     if (event.getTransferMode() == TransferMode.MOVE) {
                         grid.getChildren().remove(pImageView);
                         list.remove(p);
-                        savePictures(list, fileName);
-                        drawPicturesAsImages(grid);
+//                        savePictures(list, fileName);
+                        drawPicturesAsImages();
                     }
                     event.consume();
             });
@@ -343,7 +297,7 @@ public class ImageUploadUI extends Application {
                 @Override
                 public void handle(ActionEvent event) {
                     doCropUI(p, true);
-                    savePictures(list, fileName);  //save image
+//                    savePictures(list, fileName);  //save image
                 }
             };
 
@@ -357,8 +311,8 @@ public class ImageUploadUI extends Application {
                     Optional<String> result = renamePopup.showAndWait();
                     if (result.isPresent()) {
                         p.setName(renamePopup.getEditor().getText());
-                        drawPicturesAsImages(grid);
-                        savePictures(list, fileName);  //save image
+                        drawPicturesAsImages();
+//                        savePictures(list, fileName);  //save image
                     }
                 }
             };

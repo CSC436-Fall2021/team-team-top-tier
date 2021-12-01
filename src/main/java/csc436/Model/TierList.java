@@ -16,12 +16,13 @@ import java.util.List;
  *          theme of layout, title of TierList, etc.).
  *
  * Created: 09/29/2021
- * @author Victor A. Jimenez Granados
+ * @author Victor A. Jimenez Granados and David Dung
  */
 public class TierList implements Serializable {
     private String tierListTitle;
     private List<Tier> tiers;
     private String tierListStyle;
+    private ArrayList<Picture> pictureArrayList;
     private ArrayList<String> tagList;
     private SerializableColor backgroundColor;
     private SerializableColor tierRowColor;
@@ -29,6 +30,7 @@ public class TierList implements Serializable {
     public TierList(String title) {
         tierListTitle = title;
         tiers = new ArrayList<Tier>();
+        pictureArrayList = new ArrayList<Picture>();
         tierListStyle = "";
         tiers.add(new Tier("S", 0));
         tiers.add(new Tier("A", 1));
@@ -101,6 +103,7 @@ public class TierList implements Serializable {
         return tierListStyle;
     }
 
+    public ArrayList<Picture> getPictureArrayList() { return pictureArrayList; }
     /**
      * Purpose: Sets a new CSS style for the TierList.
      * @param tierListStyle The new CSS for this tier list.
