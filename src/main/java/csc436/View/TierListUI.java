@@ -177,8 +177,8 @@ public class TierListUI {
                 current.removePicture(pic);
                 refreshTier(pictureList, current, addIcon);
                 imageUploadUI.getList().add(pic);
-                imageUploadUI.drawPicturesAsImages(imageGrid);
-                imageUploadUI.savePictures(imageUploadUI.getList(), imageUploadUI.fileName);
+                imageUploadUI.drawPicturesAsImages();
+//                imageUploadUI.savePictures(imageUploadUI.getList(), imageUploadUI.fileName);
             });
             picture.setFitHeight(PICTURE_DRAW_SIZE);
             picture.setFitWidth(PICTURE_DRAW_SIZE);
@@ -385,7 +385,7 @@ public class TierListUI {
             tierGrid.add(vBoxOptionsBtn,2, index);
         }
 
-        imageUploadUI.drawPicturesAsImages(tierGrid);
+        imageUploadUI.drawPicturesAsImages();
     }
 
     private MenuItem makeColorMenu() {
@@ -495,8 +495,8 @@ public class TierListUI {
             imageGrid.getColumnConstraints().add(column);
         }
 
-        imageUploadUI = new ImageUploadUI(tierList, tierGrid, imageGrid);
-        imageUploadUI.drawPicturesAsImages(tierGrid);
+        imageUploadUI = new ImageUploadUI(tierList, tierGrid, imageGrid, tierList.getPictureArrayList(), new Stage());
+        imageUploadUI.drawPicturesAsImages();
     }
 
     /**
