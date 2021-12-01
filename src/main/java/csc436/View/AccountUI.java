@@ -210,9 +210,9 @@ public class AccountUI {
             //check all the tags to see if the tier list has all the tags
             for (Button tagButt: selectedTagButtons) {
                 if (!account.getTierLists().get(i).getTagList().contains(tagButt.getText())) {
-                        found = false;
-                        break;
-                    }
+                    found = false;
+                    break;
+                }
             }
 
             // if the TierList has all the tags, add it to the pane
@@ -449,13 +449,14 @@ public class AccountUI {
         //Creates the Nodes necessary for a new TierList (Text fields and button).
         Label tagTextLabel = new Label("Add a tag:");
         TextField tagTextField = new TextField();
-        Text tagText = new Text();
-        updateTags(clickedTierList, tagText);
+        VBox tags = new VBox();
+        tags.setSpacing(2);
+        updateTags(clickedTierList, tags);
         Label tagCurrLabel = new Label("");
-        if(tagText.getText().length() > 0) {
+        if(tags.getChildren().size() > 0) {
             tagCurrLabel.setText("Tags");
         }
-        ScrollPane tagScrollPane = new ScrollPane(tagText);
+        ScrollPane tagScrollPane = new ScrollPane(tags);
 
         //Sets the style of the labels and button.
         tagScrollPane.setStyle("-fx-font-size: 10pt; -fx-background-color:transparent;");
@@ -484,8 +485,8 @@ public class AccountUI {
                 if(tagTextField.getText() == "") {
                     return;
                 }
-                addTierListTag(clickedTierList, clickedTierList.formatTag(tagTextField.getText()), tagText);
-                if(tagText.getText().length() > 0) {
+                addTierListTag(clickedTierList, clickedTierList.formatTag(tagTextField.getText()), tags);
+                if(tags.getChildren().size() > 0) {
                     tagCurrLabel.setText("Tags");
                 }
                 tagTextField.setText("");
@@ -538,14 +539,21 @@ public class AccountUI {
 
         //tag tooltip
         Tooltip tip = new Tooltip();
-        Tooltip.install(button, tip);
         tip.setHideDelay(null);
+        tip.hide();
         button.setOnMouseEntered( ev -> {
             clickedTierList = account.getTierLists().get(index);
             nameOfTierList = clickedTierList.getTierListTitle();
-            Text newText = new Text();
-            updateTags(clickedTierList, newText);
-            tip.setText(newText.getText());
+            String tagToolTip = getTagsTip(clickedTierList);
+            Text newText = new Text(tagToolTip);
+            if (tagToolTip != null) {
+                Tooltip.install(button, tip);
+                tip.setText(newText.getText());
+            }else{
+                tip.setText("");
+                Tooltip.uninstall(button, tip);
+                tip.hide();
+            }
         });
         button.setOnMouseMoved( ev -> {
             if(tip.getText().length() > 0) {
@@ -668,19 +676,33 @@ public class AccountUI {
         TierListMaker.changeScenes(tierListUI.getTierListUI());
     }
 
-    private void addTierListTag(TierList tierList, String tag, Text tagText) {
+    private void addTierListTag(TierList tierList, String tag, VBox tags) {
         tierList.addTag(tag);
-        updateTags(tierList, tagText);
+        updateTags(tierList, tags);
     }
-    private void updateTags(TierList tierList, Text tagText) {
-        String tagContent = "";
+    private void updateTags(TierList tierList, VBox tags) {
+        tags.getChildren().clear();
         List<String> tagList =  tierList.getTagList();
         for (String tag: tagList) {
-            tagContent += "#" + tag + "\n";
+            Button tagBtn = new Button("#" + tag);
+            tagBtn.setStyle("-fx-background-radius: 20px; -fx-background-color: white; -fx-border-radius: 20px; -fx-border-color: black; -fx-text-fill: black;");
+            tagBtn.setOnAction((event) -> {
+                tagList.remove(tag);
+                updateTags(tierList, tags);
+            });
+            tags.getChildren().add(tagBtn);
         }
-        if(tagContent.length() - 2 > 0) {
-            tagContent.substring(0, tagContent.length() - 2);
+    }
+
+    private String getTagsTip(TierList tierList) {
+        List<String> tagList =  tierList.getTagList();
+        String tagLabel = null;
+        if (tagList.size() > 0){
+            tagLabel = "";
+            for (String tag: tagList) {
+                tagLabel += "#" + tag + "\n";
+            }
         }
-        tagText.setText(tagContent);
+        return tagLabel;
     }
 }
