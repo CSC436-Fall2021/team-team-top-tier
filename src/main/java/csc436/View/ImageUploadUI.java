@@ -9,11 +9,14 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
@@ -325,7 +328,10 @@ public class ImageUploadUI extends Application {
                 ClipboardContent clipCont= new ClipboardContent();
                 clipCont.put(Picture.PICTURE_FORMAT, p);
                 dBoard.setContent(clipCont);
-                dBoard.setDragView(p.getCroppedImage().getImage());
+                SnapshotParameters params = new SnapshotParameters();
+                params.setViewport(new Rectangle2D(0, 0, Picture.IMAGE_CROP_SIZE, Picture.IMAGE_CROP_SIZE));
+                WritableImage img = p.getCroppedImage().snapshot(params, null);
+                dBoard.setDragView(img);
                 event.consume();
             });
 

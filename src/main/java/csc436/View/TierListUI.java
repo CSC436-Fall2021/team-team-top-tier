@@ -240,11 +240,17 @@ public class TierListUI {
             tierBoxes.put(fpImageView, addPicture);
 
             addIcon.setOnDragOver((newEvent) -> {;
+                Color c = tierList.getBackgroundColor();
+                addIcon.setBackground(new Background (new BackgroundFill(c.invert(), null, null)));
                 if (newEvent.getDragboard().hasImage()){
                     newEvent.acceptTransferModes(TransferMode.MOVE);
                 } else if (newEvent.getDragboard().getContentTypes().contains(Picture.PICTURE_FORMAT)){
                     newEvent.acceptTransferModes(TransferMode.MOVE);
                 }
+            });
+
+            addIcon.setOnDragExited((newEvent) -> {
+                addIcon.setBackground(null);
             });
 
             addIcon.setOnDragDropped((newEvent)  -> {
