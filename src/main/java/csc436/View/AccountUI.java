@@ -96,13 +96,15 @@ public class AccountUI {
         HBox hBoxTierLists = new HBox(tierLists);
         HBox hBoxPublicTierLists = new HBox(publicTierLists);
         ScrollPane scroll = new ScrollPane(hBoxTierLists);
-        scroll.setFitToHeight(true);
+        //scroll.setPrefViewportHeight(212);
+        //scroll.setPrefViewportWidth(1600);
         scroll.setStyle("-fx-background: crimson; -fx-border-color: crimson;");
         HBox scrollPane = new HBox(scroll);
         scrollPane.setStyle("-fx-background-color: crimson");
         //Public TierList ScrollPane and HBox
         ScrollPane publicScroll = new ScrollPane(hBoxPublicTierLists);
-        publicScroll.setFitToHeight(true);
+        //publicScroll.setPrefViewportHeight(212);
+        //publicScroll.setPrefViewportWidth(1600);
         publicScroll.setStyle("-fx-background: crimson; -fx-border-color: crimson;");
         HBox publicScrollPane = new HBox(publicScroll);
         publicScrollPane.setStyle("-fx-background-color: crimson");
@@ -278,6 +280,7 @@ public class AccountUI {
 
                 //Add the Tier Button to the GridPane
                 tempRow.add(pane, y, x);
+                numOfItems++;
                 colIndex++;
             }
         }
@@ -384,6 +387,7 @@ public class AccountUI {
 
                             //Add the Tier Button to the GridPane
                             tempRow.add(pane, y, x);
+                            numOfItems++;
                             colIndex++;
                         }
                     }
