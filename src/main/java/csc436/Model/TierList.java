@@ -28,7 +28,7 @@ public class TierList implements Serializable {
     private SerializableColor tierRowColor;
     private boolean isPrivate;
 
-    public TierList(String title) {
+    public TierList(String title, boolean isPrivate) {
         tierListTitle = title;
         tiers = new ArrayList<Tier>();
         pictureArrayList = new ArrayList<Picture>();
@@ -40,7 +40,7 @@ public class TierList implements Serializable {
         tagList = new ArrayList<String>();
         backgroundColor = new SerializableColor(Color.BLACK);
         tierRowColor = new SerializableColor(Color.RED);
-        isPrivate = false;
+        this.isPrivate = isPrivate;
     }
 
     /**

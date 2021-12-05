@@ -41,6 +41,10 @@ public class AccountUI {
     private String nameOfTierList;
     private TierList clickedTierList;
     private ArrayList<Button> selectedTagButtons;
+    private ScrollPane scroll;
+    private ScrollPane publicScroll;
+    private double defaultScrollWidth;
+    private List<TierList> publicTiers = new ArrayList<TierList>();
 
     public AccountUI(Account account, AccountCollection accounts, LoginUI login) {
         this.account = account;
@@ -58,6 +62,9 @@ public class AccountUI {
 
         BorderPane pane = new BorderPane();
         pane.setStyle("-fx-background-color: crimson");
+
+        //Gets the public TierLists from other Accounts
+        getPublicTierLists();
 
         //Creates the Account Nodes necessary for the AccountUI.
         tierLists = new VBox();
@@ -95,16 +102,15 @@ public class AccountUI {
         HBox hBoxUsername= new HBox(usrnameLabel);
         HBox hBoxTierLists = new HBox(tierLists);
         HBox hBoxPublicTierLists = new HBox(publicTierLists);
-        ScrollPane scroll = new ScrollPane(hBoxTierLists);
-        //scroll.setPrefViewportHeight(212);
-        //scroll.setPrefViewportWidth(1600);
+        scroll = new ScrollPane(hBoxTierLists);
         scroll.setStyle("-fx-background: crimson; -fx-border-color: crimson;");
+        defaultScrollWidth = scroll.getPrefViewportWidth();
+        scroll.setMinViewportHeight(212);
         HBox scrollPane = new HBox(scroll);
         scrollPane.setStyle("-fx-background-color: crimson");
         //Public TierList ScrollPane and HBox
-        ScrollPane publicScroll = new ScrollPane(hBoxPublicTierLists);
-        //publicScroll.setPrefViewportHeight(212);
-        //publicScroll.setPrefViewportWidth(1600);
+        publicScroll = new ScrollPane(hBoxPublicTierLists);
+        publicScroll.setMinViewportHeight(212);
         publicScroll.setStyle("-fx-background: crimson; -fx-border-color: crimson;");
         HBox publicScrollPane = new HBox(publicScroll);
         publicScrollPane.setStyle("-fx-background-color: crimson");
@@ -138,10 +144,6 @@ public class AccountUI {
         vBox.setMargin(hBoxPublicTierListText, new Insets(25, 0, 25, 20));
         vBox.setMargin(hBoxLogOutBtn, new Insets(25, 0, 25, 0));
 
-        /*//Adding H and V gaps to components.
-        tierLists.setHgap(150);
-        tierLists.setVgap(25);*/
-
         //Adds the Account Nodes to the GridPane.
         pane.setCenter(vBox);
         vBox.setAlignment(Pos.TOP_CENTER);
@@ -166,21 +168,20 @@ public class AccountUI {
                 tempTagButton.setOnMouseClicked((event2) -> {
                     selectedTags.getChildren().remove(tempTagButton);
                     selectedTagButtons.remove(tempTagButton);
-                    showTierLists();
-                    showPublicTierLists();
+                    showTierLists(tierLists, account.getTierLists(), scroll);
+                    showTierLists(publicTierLists, publicTiers, publicScroll);
                 });
                 selectedTagButtons.add(tempTagButton);
                 tagSearchBar.setText("");
                 updateSelectedTags(selectedTags);
-                showTierLists();
-                showPublicTierLists();
+                showTierLists(tierLists, account.getTierLists(), scroll);
+                showTierLists(publicTierLists, publicTiers, publicScroll);
             }
         });
 
         //Displays the TierLists of the logged-in user.
-        showTierLists();
-        showPublicTierLists();
-        //accountScene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
+        showTierLists(tierLists, account.getTierLists(), scroll);
+        showTierLists(publicTierLists, publicTiers, publicScroll);
         return accountScene;
     }
 
@@ -201,8 +202,8 @@ public class AccountUI {
     /**
      * Draws the GUI that displays the user's TierList's.
      */
-    public void showTierLists() {
-        tierLists.getChildren().clear();
+    public void showTierLists(VBox tierBox, List<TierList> tiers, ScrollPane scrollPane) {
+        tierBox.getChildren().clear();
 
         //Current row/col of the GridPane
         int rowIndex = 0;
@@ -225,12 +226,12 @@ public class AccountUI {
         int numOfItems = 0;
 
         //Iterates through all the TierList objects in the User's TierList List.
-        for (int i = 0; i < account.getTierLists().size(); i++) {
+        for (int i = 0; i < tiers.size(); i++) {
             // found is true if the TierList contains all the tags being searched for
             Boolean found = true;
             //check all the tags to see if the tier list has all the tags
             for (Button tagButt: selectedTagButtons) {
-                if (!account.getTierLists().get(i).getTagList().contains(tagButt.getText())) {
+                if (!tiers.get(i).getTagList().contains(tagButt.getText())) {
                     found = false;
                     break;
                 }
@@ -240,8 +241,8 @@ public class AccountUI {
             if (found) {
                 //If the column is greater than the num of items allowed, creates a new row.
                 if (colIndex >= maxItemsPerRow){
-                    tierLists.getChildren().add(tempRow);
-                    tierLists.setMargin(tempRow, new Insets(0, 0, 25, 0));
+                    tierBox.getChildren().add(tempRow);
+                    tierBox.setMargin(tempRow, new Insets(0, 0, 25, 0));
                     tempRow = new GridPane();
                     tempRow.setMaxHeight(1);
                     tempRow.setMaxWidth(5);
@@ -267,13 +268,13 @@ public class AccountUI {
 
                 //Temporary solution. Possibly add a SnapShot of the actual TierList.
                 Button TierButton = new Button();
-                clickedTierList = account.getTierLists().get(i);
+                clickedTierList = tiers.get(i);
                 nameOfTierList = clickedTierList.getTierListTitle();
                 TierButton.setText(nameOfTierList);
                 TierButton.setStyle("-fx-font-size: 25pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
                 TierButton.setMaxSize(200, 200);
 
-                setButtonsEventHandler(TierButton, i);
+                setButtonsEventHandler(TierButton, i, tiers);
 
                 //Add the Tier Button to a StackPane
                 pane.getChildren().addAll(TierButton);
@@ -284,130 +285,30 @@ public class AccountUI {
                 colIndex++;
             }
         }
-        //Checks to see if a new row needs to be created with the row constraints.
-        if (colIndex % maxItemsPerRow == 0 && numOfItems != 0) {
-            tierLists.getChildren().add(tempRow);
-            tierLists.setMargin(tempRow, new Insets(0, 0, 25, 0));
-            tempRow = new GridPane();
-            tempRow.setMaxHeight(1);
-            tempRow.setMaxWidth(5);
-            tempRow.setHgap(150);
-            tempRow.getRowConstraints().add(row);
-            rowIndex = 0;
-            colIndex = 0;
-        }
-        createAddTierButton(rowIndex, colIndex, tempRow);
-        System.out.println(tierLists.getChildren().size());
-    }
-
-    /**
-     * Draws the GUI that displays the user's TierList's.
-     */
-    public void showPublicTierLists() {
-        publicTierLists.getChildren().clear();
-
-        //Current row/col of the GridPane
-        int rowIndex = 0;
-        int colIndex = 0;
-
-        GridPane tempRow = new GridPane();
-        tempRow.setMaxHeight(1);
-        tempRow.setMaxWidth(5);
-        tempRow.setHgap(150);
-        tempRow.setVgap(25);
-
-        //Row size constraints of the cells in the GridPane.
-        RowConstraints row = new RowConstraints();
-        row.setMinHeight(200);
-        row.setPrefHeight(200);
-        row.setVgrow(Priority.SOMETIMES);
-        tempRow.getRowConstraints().add(row);
-
-        //Keep track of the number of tiers that are displayed
-        int numOfItems = 0;
-
-        System.out.println("Accounts Num: " + accounts.getAccCollection().size());
-        for (Account acc : accounts.getAccCollection()) {
-            if (!acc.equals(account)){
-                //Iterates through all the TierList objects in the User's TierList List.
-                System.out.println("Account " + acc.getUsrname() + " size: " + acc.getTierLists().size());
-                for (int i = 0; i < acc.getTierLists().size(); i++) {
-                    if (!acc.getTierLists().get(i).isPrivate()) {
-                        // found is true if the TierList contains all the tags being searched for
-                        Boolean found = true;
-                        //check all the tags to see if the tier list has all the tags
-                        for (Button tagButt: selectedTagButtons) {
-                            if (!acc.getTierLists().get(i).getTagList().contains(tagButt.getText())) {
-                                found = false;
-                                break;
-                            }
-                        }
-                        System.out.println(found);
-                        // if the TierList has all the tags, add it to the pane
-                        if (found) {
-                            //If the column is greater than the num of items allowed, creates a new row.
-                            if (colIndex >= maxItemsPerRow){
-                                publicTierLists.getChildren().add(tempRow);
-                                publicTierLists.setMargin(tempRow, new Insets(0, 0, 25, 0));
-                                tempRow = new GridPane();
-                                tempRow.setMaxHeight(1);
-                                tempRow.setMaxWidth(5);
-                                tempRow.setHgap(150);
-                                tempRow.getRowConstraints().add(row);
-                                rowIndex = 0;
-                                colIndex = 0;
-                            }
-
-                            int x = rowIndex, y = colIndex;
-                            //StackPane that holds the button (temp)
-                            StackPane pane = new StackPane();
-                            pane.setStyle("-fx-border-color: black; -fx-border-radius: 20px; border-width: thick");
-                            pane.setPadding(new Insets(0, 0, 0, 0));
-                            pane.setMaxSize(200, 200);
-
-                            //Column size constraints of the cells in the GridPane. Creates one for each item added.
-                            ColumnConstraints col = new ColumnConstraints();
-                            col.setMinWidth(200);
-                            col.setPrefWidth(200);
-                            col.setHgrow(Priority.SOMETIMES);
-                            tempRow.getColumnConstraints().add(col);
-
-                            //Temporary solution. Possibly add a SnapShot of the actual TierList.
-                            Button TierButton = new Button();
-                            clickedTierList = acc.getTierLists().get(i);
-                            nameOfTierList = clickedTierList.getTierListTitle();
-                            TierButton.setText(nameOfTierList);
-                            TierButton.setStyle("-fx-font-size: 25pt; -fx-background-radius: 20px; -fx-background-color: white; -fx-text-fill: black;");
-                            TierButton.setMaxSize(200, 200);
-
-                            setButtonsEventHandler(TierButton, i);
-
-                            //Add the Tier Button to a StackPane
-                            pane.getChildren().addAll(TierButton);
-
-                            //Add the Tier Button to the GridPane
-                            tempRow.add(pane, y, x);
-                            numOfItems++;
-                            colIndex++;
-                        }
-                    }
-                }
-                //Checks to see if a new row needs to be created with the row constraints.
-                if (colIndex % maxItemsPerRow == 0 && numOfItems != 0) {
-                    publicTierLists.getChildren().add(tempRow);
-                    publicTierLists.setMargin(tempRow, new Insets(0, 0, 25, 0));
-                    tempRow = new GridPane();
-                    tempRow.setMaxHeight(1);
-                    tempRow.setMaxWidth(5);
-                    tempRow.setHgap(150);
-                    tempRow.getRowConstraints().add(row);
-                    rowIndex = 0;
-                    colIndex = 0;
-                }
+        if (tierBox.equals(tierLists)){
+            //Checks to see if a new row needs to be created with the row constraints.
+            if (colIndex % maxItemsPerRow == 0 && numOfItems != 0) {
+                tierBox.getChildren().add(tempRow);
+                tierBox.setMargin(tempRow, new Insets(0, 0, 25, 0));
+                tempRow = new GridPane();
+                tempRow.setMaxHeight(1);
+                tempRow.setMaxWidth(5);
+                tempRow.setHgap(150);
+                tempRow.getRowConstraints().add(row);
+                rowIndex = 0;
+                colIndex = 0;
             }
+            createAddTierButton(rowIndex, colIndex, tempRow);
+        }else{
+            tierBox.getChildren().add(tempRow);
         }
-        publicTierLists.getChildren().add(tempRow);
-        System.out.println(publicTierLists.getChildren().size());
+        if (tierBox.getChildren().size() > 1){
+            scrollPane.setPrefViewportWidth(1600);
+            scrollPane.setPrefViewportHeight(212);
+        }else{
+            scrollPane.setPrefViewportWidth(defaultScrollWidth);
+        }
+        System.out.println(tierBox.getChildren().size());
     }
 
     private void createAddTierButton(int rowIndex, int colIndex, GridPane tempRow) {
@@ -466,9 +367,17 @@ public class AccountUI {
 
             //Creates the Nodes necessary for a new TierList (Text fields and button).
             GridPane newTierList = new GridPane();
+            GridPane radioButtons = new GridPane();
             Label newTierListText = new Label("Create New TierList");
             Label errorMsg = new Label();
             Label newTierListTitle = new Label("TierList Title:");
+            Label publicTierList = new Label("Public Tier?");
+            ToggleGroup group = new ToggleGroup();
+            RadioButton yesBtn = new RadioButton("Yes");
+            yesBtn.setToggleGroup(group);
+            RadioButton noBtn = new RadioButton("No");
+            noBtn.setToggleGroup(group);
+            noBtn.setSelected(true);
             TextField newTierListTitleField = new TextField();
             Button createBtn = new Button("Create");
 
@@ -482,26 +391,35 @@ public class AccountUI {
             HBox hBoxErrorMsg = new HBox(errorMsg);
             HBox hBoxTierList = new HBox(newTierList);
             HBox hBoxCreateBtn = new HBox(createBtn);
-            VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxCreateBtn);
+            HBox hBoxGridRadioBtns = new HBox(radioButtons);
+            HBox hBoxRadioButtons = new HBox(yesBtn, noBtn);
+            VBox vBoxNewTierList = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTierList, hBoxGridRadioBtns, hBoxCreateBtn);
 
             //Position of Nodes.
             hBoxTierListText.setAlignment(Pos.CENTER);
             hBoxErrorMsg.setAlignment(Pos.CENTER);
             hBoxTierList.setAlignment(Pos.CENTER);
             hBoxCreateBtn.setAlignment(Pos.CENTER);
+            hBoxRadioButtons.setAlignment(Pos.CENTER);
+            hBoxGridRadioBtns.setAlignment(Pos.CENTER);
             vBoxNewTierList.setMargin(hBoxTierList, new Insets(10, 0, 10, 0));
             vBoxNewTierList.setMargin(hBoxErrorMsg, new Insets(5, 0, 0, 0));
             vBoxNewTierList.setMargin(hBoxCreateBtn, new Insets(10, 0, 10, 155));
+            hBoxRadioButtons.setMargin(yesBtn, new Insets(0, 10, 0, 10));
 
             //Size of textFields.
             newTierListTitleField.setPrefWidth(100);
             //Adding H and V gaps to components.
             newTierList.setHgap(10);
             newTierList.setVgap(10);
+            radioButtons.setHgap(10);
+            radioButtons.setVgap(10);
 
             //Adds all the Labels and Fields for a new TierList to the grid.
             newTierList.add(newTierListTitle, 0, 0);
             newTierList.add(newTierListTitleField, 1, 0);
+            radioButtons.add(publicTierList, 0, 0);
+            radioButtons.add(hBoxRadioButtons, 1, 0);
 
 
             //Puts the VBox into a GridPane
@@ -512,7 +430,7 @@ public class AccountUI {
             //Event handlers to create a new TierList.
             createBtn.setOnAction((newEvent) -> {
                 //Creates and opens the new TierList.
-                createTierList(newTierListTitleField, errorMsg, newTierListStage);
+                createTierList(newTierListTitleField, errorMsg, newTierListStage, noBtn.isSelected());
             });
 
             Scene dialogScene = new Scene(newTierListPane, 300, 200);
@@ -569,6 +487,70 @@ public class AccountUI {
         newTierListStage.setScene(dialogScene);
         newTierListStage.show();
     }
+
+    private void showUpdatePrivacyUI(boolean currentPrivate) {
+        final Stage newTierListStage = new Stage();
+        BorderPane newTierListPane = new BorderPane();
+        newTierListStage.setTitle("Update Privacy");
+        newTierListStage.initModality(Modality.APPLICATION_MODAL);
+
+        //Creates the Nodes necessary for a new TierList (Text fields and button).
+        GridPane radioButtons = new GridPane();
+        Label publicTierList = new Label("Public Tier?");
+        ToggleGroup group = new ToggleGroup();
+        RadioButton yesBtn = new RadioButton("Yes");
+        yesBtn.setToggleGroup(group);
+        RadioButton noBtn = new RadioButton("No");
+        noBtn.setToggleGroup(group);
+        Button updateBtn = new Button("Update");
+
+        if (currentPrivate){
+            noBtn.setSelected(true);
+        }else{
+            yesBtn.setSelected(true);
+        }
+
+        //Sets the style of the labels and button.
+        updateBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+
+        //Creates a VBox with all the Nodes.
+        HBox hBoxUpdateBtn = new HBox(updateBtn);
+        HBox hBoxGridRadioBtns = new HBox(radioButtons);
+        HBox hBoxRadioButtons = new HBox(yesBtn, noBtn);
+        VBox vBoxNewTierList = new VBox(hBoxGridRadioBtns, hBoxUpdateBtn);
+
+        //Position of Nodes.
+        hBoxUpdateBtn.setAlignment(Pos.CENTER);
+        hBoxRadioButtons.setAlignment(Pos.CENTER);
+        hBoxGridRadioBtns.setAlignment(Pos.CENTER);
+        hBoxUpdateBtn.setMargin(updateBtn, new Insets(25, 0, 0, 0));
+        hBoxRadioButtons.setMargin(yesBtn, new Insets(0, 10, 0, 10));
+
+        //Adding H and V gaps to components.
+        radioButtons.setHgap(10);
+        radioButtons.setVgap(10);
+
+        //Adds all the Labels and Fields for a new TierList to the grid.
+        radioButtons.add(publicTierList, 0, 0);
+        radioButtons.add(hBoxRadioButtons, 1, 0);
+
+
+        //Puts the VBox into a GridPane
+        newTierListPane.setCenter(vBoxNewTierList);
+        vBoxNewTierList.setAlignment(Pos.CENTER);
+        newTierListPane.setMargin(vBoxNewTierList, new Insets(25, 0, 0, 0));
+
+        //Event handlers to create a new TierList.
+        updateBtn.setOnAction((newEvent) -> {
+            //Creates and opens the new TierList.
+            updatePrivacy(clickedTierList, newTierListStage, noBtn.isSelected());
+        });
+
+        Scene dialogScene = new Scene(newTierListPane, 200 , 125);
+        newTierListStage.setScene(dialogScene);
+        newTierListStage.show();
+    }
+
 
     /**
      * shows a popup that allows users to add and delete any tags that they would like
@@ -647,7 +629,12 @@ public class AccountUI {
         tagContext.setOnAction((newEvent) -> {
             showManageTagsUI();
         });
-        menu.getItems().addAll(updateContext, deleteContext, tagContext);
+
+        MenuItem updatePrivacy = new MenuItem("Update Privacy");
+        updatePrivacy.setOnAction((event) -> {
+            showUpdatePrivacyUI(clickedTierList.isPrivate());
+        });
+        menu.getItems().addAll(updateContext, deleteContext, updatePrivacy, tagContext);
 
         return menu;
     }
@@ -658,24 +645,26 @@ public class AccountUI {
      * @param button - a TierList button
      * @param index - the index connected to the TierList button
      */
-    private void setButtonsEventHandler(Button button, int index) {
+    private void setButtonsEventHandler(Button button, int index, List<TierList> tiers) {
 
-        //context menu
-        ContextMenu menu = doTierListContextMenu();
-        button.setOnContextMenuRequested(event -> {
-            clickedTierList = account.getTierLists().get(index);
-            nameOfTierList = clickedTierList.getTierListTitle();
-            menu.setY(event.getScreenY());
-            menu.setX(event.getScreenX());
-            menu.show(button.getScene().getWindow());
-        });
+        if (!tiers.equals(publicTiers)){
+            //context menu
+            ContextMenu menu = doTierListContextMenu();
+            button.setOnContextMenuRequested(event -> {
+                clickedTierList = tiers.get(index);
+                nameOfTierList = clickedTierList.getTierListTitle();
+                menu.setY(event.getScreenY());
+                menu.setX(event.getScreenX());
+                menu.show(button.getScene().getWindow());
+            });
+        }
 
         //tag tooltip
         Tooltip tip = new Tooltip();
         tip.setHideDelay(null);
         tip.hide();
         button.setOnMouseEntered( ev -> {
-            clickedTierList = account.getTierLists().get(index);
+            clickedTierList = tiers.get(index);
             nameOfTierList = clickedTierList.getTierListTitle();
             String tagToolTip = getTagsTip(clickedTierList);
             Text newText = new Text(tagToolTip);
@@ -696,12 +685,15 @@ public class AccountUI {
         button.setOnMouseExited( ev -> {
             tip.hide();
         });
-
         //button press
         button.setOnAction((event) -> {
-            clickedTierList = account.getTierLists().get(index);
+            clickedTierList = tiers.get(index);
             nameOfTierList = clickedTierList.getTierListTitle();
-            openTierList(clickedTierList);
+            if (tiers.equals(publicTiers)){
+                openTierList(clickedTierList, false);
+            }else{
+                openTierList(clickedTierList, true);
+            }
         });
     }
 
@@ -711,28 +703,34 @@ public class AccountUI {
      * @param errorMsg A Label that may display an error message to the user.
      * @param tierListStage The Stage which contained the Create button.
      */
-    private void createTierList(TextField tierListTitle, Label errorMsg, Stage tierListStage) {
+    private void createTierList(TextField tierListTitle, Label errorMsg, Stage tierListStage, boolean isPrivate) {
         String title = tierListTitle.getText();
         boolean exists = false;
 
-        //Iterates through TierList and checks if the title already exists.
-        for (TierList t : account.getTierLists()) {
-            if (t.getTierListTitle().equals(title)){
-                exists = true;
-                break;
+        if (!title.isEmpty()){
+            //Iterates through TierList and checks if the title already exists.
+            for (TierList t : account.getTierLists()) {
+                if (t.getTierListTitle().equals(title)){
+                    exists = true;
+                    break;
+                }
             }
-        }
 
-        if (!exists){
-            //Creates a new TierList and adds it to the TierList List of the user's account.
-            TierList newTierList = new TierList(title);
-            account.getTierLists().add(newTierList);
-            //Creates a new TierListUI and displayed the TierList.
-            TierListUI tierListUI = new TierListUI(newTierList);
-            TierListMaker.changeScenes(tierListUI.getTierListUI());
-            tierListStage.close();
-        }else{//If Title exists, display error message.
-            errorMsg.setText("The Title Already Exists.");
+            if (!exists){
+                //Creates a new TierList and adds it to the TierList List of the user's account.
+                TierList newTierList = new TierList(title, isPrivate);
+                account.getTierLists().add(newTierList);
+                //Creates a new TierListUI and displayed the TierList.
+                TierListUI tierListUI = new TierListUI(newTierList, true);
+                TierListMaker.changeScenes(tierListUI.getTierListUI());
+                tierListStage.close();
+            }else{//If Title exists, display error message.
+                errorMsg.setText("The Title Already Exists.");
+                errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
+                tierListTitle.setText("");
+            }
+        }else{//If Title is empty, display error message.
+            errorMsg.setText("The Title Can't Be Empty.");
             errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
             tierListTitle.setText("");
         }
@@ -751,9 +749,8 @@ public class AccountUI {
         if (tier != null){
             tier.delete();
         }
-        //newTierListStage.close();
-        showTierLists();
-        showPublicTierLists();
+        showTierLists(tierLists, account.getTierLists(), scroll);
+        showTierLists(publicTierLists, publicTiers, publicScroll);
     }
 
     /**
@@ -786,8 +783,8 @@ public class AccountUI {
                 }
                 tierList.setTierListTitle(newTitle);
                 newTierListStage.close();
-                showTierLists();
-                showPublicTierLists();
+                showTierLists(tierLists, account.getTierLists(), scroll);
+                showTierLists(publicTierLists, publicTiers, publicScroll);
             }else{//If Title exists, display error message.
                 errorMsg.setText("The Title Already Exists.");
                 errorMsg.setStyle("-fx-text-fill: red; -fx-font-weight: bold");
@@ -805,10 +802,26 @@ public class AccountUI {
      * Purpose: Opens the TierListUI of the specified TierList.
      * @param tierList The TierList clicked on the user's Account.
      */
-    private void openTierList(TierList tierList) {
+    private void openTierList(TierList tierList, boolean canEdit) {
         //Creates a new TierListUI and displayed the TierList.
-        TierListUI tierListUI = new TierListUI(tierList);
+        TierListUI tierListUI = new TierListUI(tierList, canEdit);
         TierListMaker.changeScenes(tierListUI.getTierListUI());
+    }
+
+    /**
+     * Purpose: Iterates through each of the Accounts, and retrieves all the Public TierLists of the accounts.
+     */
+    public void getPublicTierLists() {
+        for (Account acc : accounts.getAccCollection()){
+            if (!acc.equals(account)){
+                for (TierList tier : acc.getTierLists()){
+                    if (!tier.isPrivate()){
+                        publicTiers.add(tier);
+                    }
+                }
+            }
+        }
+        System.out.println(publicTiers.size());
     }
 
     private void addTierListTag(TierList tierList, String tag, VBox tags) {
@@ -839,5 +852,10 @@ public class AccountUI {
             }
         }
         return tagLabel;
+    }
+
+    private void updatePrivacy(TierList tier, Stage stage, boolean isPrivate){
+        tier.setPrivate(isPrivate);
+        stage.close();
     }
 }
