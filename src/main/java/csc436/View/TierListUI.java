@@ -57,10 +57,10 @@ public class TierListUI {
     private String selectedTierTitle;
     private Tier selectedTier;
     private BorderPane pane;
-    private int indexOfSelectedTier;
-    private Scene tierListScene;
+    private boolean isEditable;
 
     Color tierLevelCurrent;
+    private Color tierColor;
 
     private HashMap<FlowPane, ImageView> tierBoxes;
     private GridPane tierGrid;
@@ -68,10 +68,11 @@ public class TierListUI {
 
     private ImageUploadUI imageUploadUI;
 
-    public TierListUI(TierList tierList){
+    public TierListUI(TierList tierList, boolean canEdit){
         this.tierList= tierList;
         windowWidth= 1080;
         windowHeight= 720;
+        isEditable = canEdit;
     }
 
     public Scene getTierListUI() {
@@ -162,6 +163,7 @@ public class TierListUI {
         tierGrid.getColumnConstraints().add(new ColumnConstraints(COLUMN_WIDTH));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(MAX_PICTURE_NUMBER * PICTURE_DRAW_SIZE + 6));
         tierGrid.getColumnConstraints().add(new ColumnConstraints(COLUMN_WIDTH + 8));
+        tierColor = tierList.getTierRowColor();
 
         getImageUI();
         makeTierListUI();
@@ -185,7 +187,9 @@ public class TierListUI {
             pictureList.getChildren().add(picture);
         }
 
-        pictureList.getChildren().add(addIcon);
+        if (isEditable){
+            pictureList.getChildren().add(addIcon);
+        }
     }
 
     // Create and return the Tier List's base user interface
@@ -196,7 +200,7 @@ public class TierListUI {
         List<Tier> tiers= tierList.getTiers();
 
         // The loop adds nodes to the tier list GridPane and stylizes them as well
-        tierLevelCurrent = tierList.getTierRowColor();
+        tierLevelCurrent = tierColor;
         for (int i=0;i<tiers.size();i++) {
             int index = i;
             Label tierTitleLabel = new Label(tiers.get(index).getTierTitle());
@@ -281,109 +285,111 @@ public class TierListUI {
             options.setStyle("-fx-font-size: 25pt; -fx-background-radius: 20px; -fx-background-color: black; -fx-text-fill: black;");
             options.setGraphic(cogView);
 
-            options.setOnAction((event) -> {
-                int thisTierIndex = index;
-                selectedTier = tiers.get(index);
-                selectedTierTitle = selectedTier.getTierTitle();
-                final Stage newTierListStage = new Stage();
-                BorderPane newTierListPane = new BorderPane();
-                newTierListStage.setTitle("Selected Tier");
-                newTierListStage.initModality(Modality.APPLICATION_MODAL);
+            if (isEditable){
+                options.setOnAction((event) -> {
+                    int thisTierIndex = index;
+                    selectedTier = tiers.get(index);
+                    selectedTierTitle = selectedTier.getTierTitle();
+                    final Stage newTierListStage = new Stage();
+                    BorderPane newTierListPane = new BorderPane();
+                    newTierListStage.setTitle("Selected Tier");
+                    newTierListStage.initModality(Modality.APPLICATION_MODAL);
 
-                //Creates the Nodes necessary for a new TierList (Text fields and button).
-                GridPane newTier = new GridPane();
-                GridPane updateTier = new GridPane();
-                Label newTierText = new Label(selectedTierTitle + " Tier");
-                Label errorMsg = new Label();
-                Label newTierTitle = new Label("New Tier:");
-                Label updateTierTitle = new Label("Update Tier:");
-                TextField newTierTitleField = new TextField();
-                TextField updateTierTitleField = new TextField();
-                Button addUpBtn = new Button("Add On Top");
-                Button addDownBtn = new Button("Add Below");
-                Button deleteBtn = new Button("Delete");
-                Button updateBtn = new Button ("Update");
+                    //Creates the Nodes necessary for a new TierList (Text fields and button).
+                    GridPane newTier = new GridPane();
+                    GridPane updateTier = new GridPane();
+                    Label newTierText = new Label(selectedTierTitle + " Tier");
+                    Label errorMsg = new Label();
+                    Label newTierTitle = new Label("New Tier:");
+                    Label updateTierTitle = new Label("Update Tier:");
+                    TextField newTierTitleField = new TextField();
+                    TextField updateTierTitleField = new TextField();
+                    Button addUpBtn = new Button("Add On Top");
+                    Button addDownBtn = new Button("Add Below");
+                    Button deleteBtn = new Button("Delete");
+                    Button updateBtn = new Button ("Update");
 
-                //Sets the style of the labels and button.
-                newTierText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 24));
-                errorMsg.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
-                addUpBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
-                addDownBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
-                deleteBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
-                updateBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+                    //Sets the style of the labels and button.
+                    newTierText.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 24));
+                    errorMsg.setFont(Font.font("Regular", FontWeight.NORMAL, FontPosture.REGULAR, 14));
+                    addUpBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+                    addDownBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+                    deleteBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
+                    updateBtn.setStyle("-fx-font-size: 10pt; -fx-background-radius: 20px;");
 
-                //Creates a VBox with all the Nodes.
-                HBox hBoxTierListText = new HBox(newTierText);
-                HBox hBoxErrorMsg = new HBox(errorMsg);
-                HBox hBoxTier = new HBox(newTier);
-                HBox hBoxUpdateTier = new HBox(updateTier);
-                VBox vBoxAddBtns = new VBox(addUpBtn, addDownBtn);
-                VBox vBoxBtns = new VBox(updateBtn, deleteBtn);
-                //HBox hBoxBtns = new HBox(gridPaneBtns);
-                VBox vBoxNewTier = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTier, hBoxUpdateTier);
+                    //Creates a VBox with all the Nodes.
+                    HBox hBoxTierListText = new HBox(newTierText);
+                    HBox hBoxErrorMsg = new HBox(errorMsg);
+                    HBox hBoxTier = new HBox(newTier);
+                    HBox hBoxUpdateTier = new HBox(updateTier);
+                    VBox vBoxAddBtns = new VBox(addUpBtn, addDownBtn);
+                    VBox vBoxBtns = new VBox(updateBtn, deleteBtn);
+                    //HBox hBoxBtns = new HBox(gridPaneBtns);
+                    VBox vBoxNewTier = new VBox(hBoxTierListText, hBoxErrorMsg, hBoxTier, hBoxUpdateTier);
 
-                //Position of Nodes.
-                hBoxTierListText.setAlignment(Pos.CENTER);
-                hBoxErrorMsg.setAlignment(Pos.CENTER);
-                hBoxTier.setAlignment(Pos.CENTER);
-                hBoxUpdateTier.setAlignment(Pos.CENTER);
-                vBoxAddBtns.setAlignment(Pos.CENTER);
-                vBoxBtns.setAlignment(Pos.CENTER);
-                //hBoxBtns.setAlignment(Pos.CENTER);
-                vBoxNewTier.setMargin(hBoxErrorMsg, new Insets(5, 0, 0, 0));
-                vBoxAddBtns.setMargin(addUpBtn, new Insets(0, 0, 5, 0));
-                vBoxAddBtns.setMargin(updateBtn, new Insets(0, 0, 5, 0));
-                vBoxNewTier.setMargin(hBoxTier, new Insets(10, 0, 20, 0));
-                vBoxNewTier.setMargin(hBoxUpdateTier, new Insets(0, 10, 0, 0));
-                //vBoxNewTier.setMargin(hBoxBtns, new Insets(10, 0, 10, 0));
+                    //Position of Nodes.
+                    hBoxTierListText.setAlignment(Pos.CENTER);
+                    hBoxErrorMsg.setAlignment(Pos.CENTER);
+                    hBoxTier.setAlignment(Pos.CENTER);
+                    hBoxUpdateTier.setAlignment(Pos.CENTER);
+                    vBoxAddBtns.setAlignment(Pos.CENTER);
+                    vBoxBtns.setAlignment(Pos.CENTER);
+                    //hBoxBtns.setAlignment(Pos.CENTER);
+                    vBoxNewTier.setMargin(hBoxErrorMsg, new Insets(5, 0, 0, 0));
+                    vBoxAddBtns.setMargin(addUpBtn, new Insets(0, 0, 5, 0));
+                    vBoxAddBtns.setMargin(updateBtn, new Insets(0, 0, 5, 0));
+                    vBoxNewTier.setMargin(hBoxTier, new Insets(10, 0, 20, 0));
+                    vBoxNewTier.setMargin(hBoxUpdateTier, new Insets(0, 10, 0, 0));
+                    //vBoxNewTier.setMargin(hBoxBtns, new Insets(10, 0, 10, 0));
 
-                //Size of textFields.
-                newTierTitleField.setPrefWidth(100);
-                updateTierTitleField.setPrefWidth(100);
-                //Adding H and V gaps to components.
-                newTier.setHgap(10);
-                newTier.setVgap(10);
-                updateTier.setHgap(10);
-                updateTier.setVgap(10);
+                    //Size of textFields.
+                    newTierTitleField.setPrefWidth(100);
+                    updateTierTitleField.setPrefWidth(100);
+                    //Adding H and V gaps to components.
+                    newTier.setHgap(10);
+                    newTier.setVgap(10);
+                    updateTier.setHgap(10);
+                    updateTier.setVgap(10);
 
-                //Adds all the Labels and Fields for a new TierList to the grid.
-                newTier.add(newTierTitle, 0, 0);
-                newTier.add(newTierTitleField, 1, 0);
-                newTier.add(vBoxAddBtns, 2, 0);
-                updateTier.add(updateTierTitle, 0, 0);
-                updateTier.add(updateTierTitleField, 1, 0);
-                updateTier.add(vBoxBtns, 2, 0);
+                    //Adds all the Labels and Fields for a new TierList to the grid.
+                    newTier.add(newTierTitle, 0, 0);
+                    newTier.add(newTierTitleField, 1, 0);
+                    newTier.add(vBoxAddBtns, 2, 0);
+                    updateTier.add(updateTierTitle, 0, 0);
+                    updateTier.add(updateTierTitleField, 1, 0);
+                    updateTier.add(vBoxBtns, 2, 0);
 
-                //Puts the VBox into a GridPane
-                newTierListPane.setCenter(vBoxNewTier);
-                vBoxNewTier.setAlignment(Pos.TOP_CENTER);
-                newTierListPane.setMargin(vBoxNewTier, new Insets(25, 0, 0, 0));
+                    //Puts the VBox into a GridPane
+                    newTierListPane.setCenter(vBoxNewTier);
+                    vBoxNewTier.setAlignment(Pos.TOP_CENTER);
+                    newTierListPane.setMargin(vBoxNewTier, new Insets(25, 0, 0, 0));
 
-                //Event handlers to delete the selected TierList.
-                deleteBtn.setOnAction((newEvent) -> {
-                    //Creates and opens the new TierList.
-                    deleteTier(selectedTier, newTierListStage);
+                    //Event handlers to delete the selected TierList.
+                    deleteBtn.setOnAction((newEvent) -> {
+                        //Creates and opens the new TierList.
+                        deleteTier(selectedTier, newTierListStage);
+                    });
+
+                    //Event handlers to update the selected TierList.
+                    updateBtn.setOnAction((event1) -> {
+                        updateTier(selectedTier, updateTierTitleField, errorMsg, newTierListStage);
+                    });
+
+                    //Event handlers to open the selected TierList.
+                    addUpBtn.setOnAction((event2) -> {
+                        addTopTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, thisTierIndex);
+                    });
+
+                    //Event handlers to open the selected TierList.
+                    addDownBtn.setOnAction((event2) -> {
+                        addBottonTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, thisTierIndex);
+                    });
+
+                    Scene dialogScene = new Scene(newTierListPane, 300, 300);
+                    newTierListStage.setScene(dialogScene);
+                    newTierListStage.show();
                 });
-
-                //Event handlers to update the selected TierList.
-                updateBtn.setOnAction((event1) -> {
-                    updateTier(selectedTier, updateTierTitleField, errorMsg, newTierListStage);
-                });
-
-                //Event handlers to open the selected TierList.
-                addUpBtn.setOnAction((event2) -> {
-                    addTopTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, thisTierIndex);
-                });
-
-                //Event handlers to open the selected TierList.
-                addDownBtn.setOnAction((event2) -> {
-                    addBottonTier(selectedTier, newTierTitleField, errorMsg, newTierListStage, thisTierIndex);
-                });
-
-                Scene dialogScene = new Scene(newTierListPane, 300, 300);
-                newTierListStage.setScene(dialogScene);
-                newTierListStage.show();
-            });
+            }
             VBox vBoxOptionsBtn = new VBox(options);
             // Modifies the option boxes on the right
             vBoxOptionsBtn.setAlignment(Pos.CENTER);
@@ -391,7 +397,9 @@ public class TierListUI {
             tierGrid.add(vBoxOptionsBtn,2, index);
         }
 
-        imageUploadUI.drawPicturesAsImages();
+        if (isEditable){
+            imageUploadUI.drawPicturesAsImages();
+        }
     }
 
     private MenuItem makeColorMenu() {
@@ -420,10 +428,17 @@ public class TierListUI {
             save.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    tierList.setTierRowColor(tierCp.getValue());
-                    makeTierListUI();
-                    tierList.setBackgroundColor(backgroundCp.getValue());
-                    tierGrid.setBackground(new Background(new BackgroundFill(tierList.getBackgroundColor(), null, null)));
+                    if (isEditable){
+                        tierList.setTierRowColor(tierCp.getValue());
+                        tierColor = tierList.getTierRowColor();
+                        makeTierListUI();
+                        tierList.setBackgroundColor(backgroundCp.getValue());
+                        tierGrid.setBackground(new Background(new BackgroundFill(tierList.getBackgroundColor(), null, null)));
+                    }else{
+                        tierColor = tierCp.getValue();
+                        makeTierListUI();
+                        tierGrid.setBackground(new Background(new BackgroundFill(backgroundCp.getValue(), null, null)));
+                    }
                     colorStage.close();
                 }
             });

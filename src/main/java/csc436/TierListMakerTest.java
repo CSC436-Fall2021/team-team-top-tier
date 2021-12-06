@@ -13,7 +13,7 @@ public class TierListMakerTest {
     @Test
     public void loadSaveTierList(){
         saveTierList();
-        TierList loadedTierList = new TierList("Temp");
+        TierList loadedTierList = new TierList("Temp", true);
         try {
             if((TierList) loadedTierList.load("Testing") != null) {
                 loadedTierList = (TierList) loadedTierList.load("Testing");
@@ -30,7 +30,7 @@ public class TierListMakerTest {
 
 
     public void saveTierList(){
-        TierList myTier = new TierList("Testing");
+        TierList myTier = new TierList("Testing", true);
         List<Tier> tiers = myTier.getTiers();
         tiers.add(new Tier("D", tiers.size()));
         tiers.add(new Tier("E", tiers.size()));

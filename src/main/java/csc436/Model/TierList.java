@@ -26,8 +26,9 @@ public class TierList implements Serializable {
     private ArrayList<String> tagList;
     private SerializableColor backgroundColor;
     private SerializableColor tierRowColor;
+    private boolean isPrivate;
 
-    public TierList(String title) {
+    public TierList(String title, boolean isPrivate) {
         tierListTitle = title;
         tiers = new ArrayList<Tier>();
         pictureArrayList = new ArrayList<Picture>();
@@ -39,6 +40,7 @@ public class TierList implements Serializable {
         tagList = new ArrayList<String>();
         backgroundColor = new SerializableColor(Color.BLACK);
         tierRowColor = new SerializableColor(Color.RED);
+        this.isPrivate = isPrivate;
     }
 
     /**
@@ -110,6 +112,22 @@ public class TierList implements Serializable {
      */
     public void setTierListStyle(String tierListStyle) {
         this.tierListStyle = tierListStyle;
+    }
+
+    /**
+     * Purpose: Returns the privacy status of the TierList.
+     * @return isPrivate Returns T if the TierList is private, F otherwise.
+     */
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    /**
+     * Purpose: Sets the TierList to the given Privacy status aPrivate.
+     * @param aPrivate The status of the TierList. T if private, F otherwise.
+     */
+    public void setPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
     }
 
     /*
