@@ -183,10 +183,12 @@ public class TierListUI {
         for(Picture pic : current.getPictures()) {
             ImageView picture = pic.getCroppedImage();
             picture.setOnMouseClicked((event) -> {
-                current.removePicture(pic);
-                refreshTier(pictureList, current, addIcon);
-                imageUploadUI.getList().add(pic);
-                imageUploadUI.drawPicturesAsImages();
+                if (isEditable){
+                    current.removePicture(pic);
+                    refreshTier(pictureList, current, addIcon);
+                    imageUploadUI.getList().add(pic);
+                    imageUploadUI.drawPicturesAsImages();
+                }
 //                imageUploadUI.savePictures(imageUploadUI.getList(), imageUploadUI.fileName);
             });
             picture.setFitHeight(PICTURE_DRAW_SIZE);
