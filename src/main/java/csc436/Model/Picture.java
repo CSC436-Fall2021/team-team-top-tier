@@ -73,7 +73,6 @@ public class Picture implements Serializable, Comparable {
     public Image createImage() {
         try {
             Image image = new Image(new FileInputStream(path), width, height, true, true);
-            System.out.printf("width: %f\nheight: %f\n", width, height);
             return image;
         } catch (FileNotFoundException e) {
             System.out.printf("File %s not found.\n", path);

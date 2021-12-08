@@ -216,16 +216,12 @@ public class LoginUI {
         //Checks if the username and password belongs to an Account of the system.
         if (accounts.logIn(usrEntered, pwdEntered)) {
             //Successfully logged in.
-            loginText.setText("You successfully logged in!");
-            loginText.setStyle("-fx-text-fill: white; -fx-font-weight: bold");
+            System.out.println("Login Successful");
             //Sets current user to the signed in account.
             Account currentUser = accounts.getAccount(usrEntered, pwdEntered);
             AccountUI user = new AccountUI(currentUser, accounts, this);
-            //TierListUI tierListUI = new TierListUI();
-            //TierListMaker.changeScenes(tierListUI.getTierListUI());
             TierListMaker.changeScenes(user.getAccountWindow());
             //Updates the scene to our Profile window.
-            System.out.println("Username: " + currentUser.getUsrname() + "\nPassword: " + currentUser.getPwd());
         }else {
             //Updates the feedback label to display error.
             loginText.setText("Incorrect username or password.");

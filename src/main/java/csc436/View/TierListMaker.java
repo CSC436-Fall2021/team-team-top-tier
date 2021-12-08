@@ -37,7 +37,6 @@ public class TierListMaker extends Application {
             }
         }catch(Exception e) {
         }
-        System.out.println("Number of accounts: " + accounts.getAccCollection().size());
         //Creates a LogInUI object.
         loginUI = new LoginUI(accounts);
 
