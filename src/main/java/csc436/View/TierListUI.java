@@ -537,7 +537,10 @@ public class TierListUI {
      * @param tier The Tier to be deleted.
      * @param newTierStage The Stage which contained the Delete button.
      */
-    private void deleteTier(Tier tier, Stage newTierStage){
+    private void deleteTier(Tier tier, Stage newTierStage) {
+        for (Picture pic : tier.getPictures()) {
+            imageUploadUI.getList().add(pic);
+        }
         tierList.getTiers().remove(tier);
         newTierStage.close();
         //TierListMaker.changeScenes(getTierListUI());
