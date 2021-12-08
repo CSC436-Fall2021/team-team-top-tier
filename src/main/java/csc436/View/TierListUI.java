@@ -1,8 +1,6 @@
 package csc436.View;
 
-import csc436.Model.Picture;
-import csc436.Model.Tier;
-import csc436.Model.TierList;
+import csc436.Model.*;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -66,13 +64,19 @@ public class TierListUI {
     private GridPane tierGrid;
     private GridPane imageGrid;
 
+    private Account account;
+    private AccountCollection accounts;
+    private LoginUI loginUI;
     private ImageUploadUI imageUploadUI;
 
-    public TierListUI(TierList tierList, boolean canEdit){
+    public TierListUI(TierList tierList, boolean canEdit, Account account, AccountCollection accounts, LoginUI loginUI){
         this.tierList= tierList;
         windowWidth= 1080;
         windowHeight= 720;
         isEditable = canEdit;
+        this.account = account;
+        this.accounts = accounts;
+        this.loginUI = loginUI;
     }
 
     public Scene getTierListUI() {
@@ -132,8 +136,10 @@ public class TierListUI {
         backButton.setGraphic(backView);
 
         backButton.setOnAction((event) -> {
-            System.out.println("GO BACK");
-            });
+            AccountUI accountUI = new AccountUI(account, accounts, loginUI);
+            TierListMaker.changeScenes(accountUI.getAccountWindow());
+
+        });
 
         Label title= new Label(tierList.getTierListTitle());
         VBox titleBox= new VBox();
@@ -494,7 +500,6 @@ public class TierListUI {
                     WritableImage writableImage = tierGrid.snapshot(params, null);
                     RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
                     ImageIO.write(renderedImage, "png", file);
-                    System.out.println("Image Saved");
 
                     //replace the plus icons
                     for (FlowPane tierBox : tierBoxes.keySet()) {
