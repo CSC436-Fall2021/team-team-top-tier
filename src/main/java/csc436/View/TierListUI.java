@@ -15,17 +15,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.paint.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
@@ -143,13 +139,16 @@ public class TierListUI {
 
         Label title= new Label(tierList.getTierListTitle());
         VBox titleBox= new VBox();
-        titleBox.getChildren().addAll(menu, title,backButton);
+        HBox backBox= new HBox(backButton);
+        titleBox.getChildren().addAll(menu, backBox, title);
+
+       // backButton.setAlignment(Pos.TOP_LEFT);
+       // title.setAlignment(Pos.TOP_CENTER);
 
         pane.setTop(titleBox);
         pane.setCenter(gridBox);
 
         // Position title and grids
-        pane.setMargin(titleBox, new Insets(0,0,40,0));
         gridBox.setMargin(scrollPane, new Insets(0,0,40,0));
         gridBox.setMargin(imageScrollPane, new Insets(0,0,40,0));
         imageGrid.setPadding(new Insets(0, 10, 0, 10));
@@ -178,6 +177,8 @@ public class TierListUI {
 
     private void refreshTier(FlowPane pictureList, Tier current, HBox addIcon) {
         pictureList.getChildren().clear();
+
+       // tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE *rowCount + 6));
 
         for(Picture pic : current.getPictures()) {
             ImageView picture = pic.getCroppedImage();
@@ -239,7 +240,8 @@ public class TierListUI {
             FlowPane fpImageView = new FlowPane();
             refreshTier(fpImageView, tiers.get(index), addIcon);
 
-            tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE *2 + 6));
+           // int rowCount= (tiers.get(index).getPictures().size()/6)+1;
+           // tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE *rowCount + 6));
             //tierGrid.getRowConstraints().add(new RowConstraints(PICTURE_DRAW_SIZE *((fpImageView.getChildren().size()/6)+1) + 6));
             tierGrid.add(hBoxTierTitle,0, index);
 
