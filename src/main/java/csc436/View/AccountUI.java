@@ -155,7 +155,7 @@ public class AccountUI {
             try {
                 accounts.saveAccountCollection();
             }catch(Exception e) {
-                System.out.println("ERROR: UNABLE TO SAVE TIERLIST ACCOUNTS.");
+                //System.out.println("ERROR: UNABLE TO SAVE TIERLIST ACCOUNTS.");
             }
             TierListMaker.changeScenes(loginUI.getLogInWindow());
         });
@@ -308,7 +308,7 @@ public class AccountUI {
         }else{
             scrollPane.setPrefViewportWidth(defaultScrollWidth);
         }
-        System.out.println(tierBox.getChildren().size());
+        //System.out.println(tierBox.getChildren().size());
     }
 
     private void createAddTierButton(int rowIndex, int colIndex, GridPane tempRow) {
@@ -721,7 +721,7 @@ public class AccountUI {
                 TierList newTierList = new TierList(title, isPrivate);
                 account.getTierLists().add(newTierList);
                 //Creates a new TierListUI and displayed the TierList.
-                TierListUI tierListUI = new TierListUI(newTierList, true);
+                TierListUI tierListUI = new TierListUI(newTierList, true, account, accounts, loginUI);
                 TierListMaker.changeScenes(tierListUI.getTierListUI());
                 tierListStage.close();
             }else{//If Title exists, display error message.
@@ -804,7 +804,7 @@ public class AccountUI {
      */
     private void openTierList(TierList tierList, boolean canEdit) {
         //Creates a new TierListUI and displayed the TierList.
-        TierListUI tierListUI = new TierListUI(tierList, canEdit);
+        TierListUI tierListUI = new TierListUI(tierList, canEdit, account, accounts, loginUI);
         TierListMaker.changeScenes(tierListUI.getTierListUI());
     }
 
@@ -821,7 +821,7 @@ public class AccountUI {
                 }
             }
         }
-        System.out.println(publicTiers.size());
+        //System.out.println(publicTiers.size());
     }
 
     private void addTierListTag(TierList tierList, String tag, VBox tags) {
