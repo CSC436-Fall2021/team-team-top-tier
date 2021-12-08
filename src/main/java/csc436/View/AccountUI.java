@@ -135,6 +135,7 @@ public class AccountUI {
         hBoxPublicTierListText.setAlignment(Pos.CENTER_LEFT);
         hBoxLogOutBtn.setAlignment(Pos.CENTER);
         tagBox.setAlignment(Pos.CENTER_RIGHT);
+        selectedTags.setAlignment(Pos.CENTER);
         tagBox.setMargin(tagSearchBar, new Insets(25, 0, 25, 150));
         tagBox.setMargin(tagLabel, new Insets(25, 0, 25, 25));
         tagBox.setMargin(selectedTags, new Insets(25, 0, 25, 25));
