@@ -198,6 +198,9 @@ public class TierListUI {
 
         if (isEditable){
             pictureList.getChildren().add(addIcon);
+        }else{
+            addIcon.setVisible(false);
+            pictureList.getChildren().add(addIcon);
         }
     }
 
